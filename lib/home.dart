@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // Checklist state
-  bool isLoading = true;
+  bool isLoading = false;
   bool openingChecklistCompleted = false;
   bool closingChecklistCompleted = false;
 
@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         .subscribeToEvent('newSensorData', _handleSensorUpdate);
 
     // Fetch both checklist and sensor data
-    fetchChecklistStatus();
+    //fetchChecklistStatus();
     fetchSensorData();
   }
 

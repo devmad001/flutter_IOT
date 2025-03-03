@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:alpha/config.dart';
 
 class ReportPage extends StatefulWidget {
   final String token;
@@ -18,6 +21,7 @@ class _ReportPageState extends State<ReportPage> {
   String _selectedPeriod = 'thisWeek';
   bool _isCustomDateEnabled = false;
   bool _showDatePicker = true;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -46,17 +50,78 @@ class _ReportPageState extends State<ReportPage> {
     }
   }
 
+  Future<void> _downloadReport() async {
+    if (_rangeStart == null || _rangeEnd == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a date range first')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      final url = Uri.parse('${Config.baseUrl}/user/report/pdf').replace(
+        queryParameters: {
+          'startDate': _rangeStart!.toIso8601String(),
+          'endDate': _rangeEnd!.toIso8601String(),
+          'period': _selectedPeriod,
+        },
+      );
+
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        // Handle the report data here
+        // For example, you could save it to a file or show it in a dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Report downloaded successfully')),
+        );
+      } else {
+        throw Exception('Failed to download report: ${response.statusCode}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error downloading report: $e')),
+      );
+    } finally {
+      setState(() {
+        _isDownloading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reports'),
-      ),
+      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Select your report frequency',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Please choose the report range below',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 16),
             DropdownButton<String>(
               value: _selectedPeriod,
               items: const [
@@ -142,14 +207,18 @@ class _ReportPageState extends State<ReportPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Implement download functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Downloading report...')),
-                  );
-                },
-                icon: const Icon(Icons.download),
-                label: const Text('Download Report'),
+                onPressed: _isDownloading ? null : _downloadReport,
+                icon: _isDownloading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.download),
+                label:
+                    Text(_isDownloading ? 'Downloading...' : 'Download Report'),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

@@ -31,7 +31,6 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     {'icon': Icons.check_box_outlined, 'label': 'CLOSING CHECKS'},
     {'icon': Icons.thermostat, 'label': 'TEMPERATURES'},
     {'icon': Icons.group, 'label': 'TEAM'},
-    {'icon': Icons.info, 'label': 'INFORMATION'},
     {'icon': Icons.report, 'label': 'INCIDENTS'},
     {'icon': Icons.bar_chart, 'label': 'REPORTS'},
     {'icon': Icons.health_and_safety, 'label': 'ALLERGY CHECK'},
@@ -104,16 +103,19 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                       if (item['label'] == 'HOME') {
                         _navigateTo('HOME', const SizedBox(), isHome: true);
                       } else if (item['label'] == 'OPENING CHECKS') {
-                        _navigateTo('OPENING CHECKS', OpeningChecklistPage(token: widget.token));
+                        _navigateTo('OPENING CHECKS',
+                            OpeningChecklistPage(token: widget.token));
                       } else if (item['label'] == 'CLOSING CHECKS') {
-                        _navigateTo('CLOSING CHECKS', ClosingChecklistPage(token: widget.token));
+                        _navigateTo('CLOSING CHECKS',
+                            ClosingChecklistPage(token: widget.token));
                       } else if (item['label'] == 'TEMPERATURES') {
                         _navigateTo(
                           'TEMPERATURES',
                           TemperatureScreen(token: widget.token),
                         );
                       } else if (item['label'] == 'INCIDENTS') {
-                        _navigateTo('INCIDENTS', IncidentPage(token: widget.token));
+                        _navigateTo(
+                            'INCIDENTS', IncidentPage(token: widget.token));
                       }
                       // Add more cases if needed.
                     },
@@ -123,16 +125,16 @@ class _SidebarLayoutState extends State<SidebarLayout> {
             ),
             const Divider(),
             ListTile(
-              leading: Icon(Icons.logout, color: Colors.red[700]),
-              title: Text('LOGOUT', style: TextStyle(color: Colors.red[700])),
-              onTap: () {
-                Navigator.pop(context); // close the drawer
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LogoutScreen()),
-                );
-              }
-            ),
+                leading: Icon(Icons.logout, color: Colors.red[700]),
+                title: Text('LOGOUT', style: TextStyle(color: Colors.red[700])),
+                onTap: () {
+                  Navigator.pop(context); // close the drawer
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LogoutScreen()),
+                  );
+                }),
           ],
         ),
       ),

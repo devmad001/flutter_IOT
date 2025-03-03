@@ -6,6 +6,7 @@ import 'closing_checklist.dart';
 import 'create_incident.dart';
 import 'sidebar_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'socket_service.dart';
 
 final baseUrl = dotenv.env['BASE_URL'];
 
@@ -32,9 +33,51 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize socket connection
+    SocketService.instance.initSocket(widget.token);
+    // Subscribe to sensor updates
+    SocketService.instance
+        .subscribeToEvent('newSensorData', _handleSensorUpdate);
+
     // Fetch both checklist and sensor data
     fetchChecklistStatus();
     fetchSensorData();
+  }
+
+  @override
+  void dispose() {
+    // Clean up socket connection
+    SocketService.instance.disconnect();
+    super.dispose();
+  }
+
+  void _handleSensorUpdate(dynamic data) {
+    print('Sensor update received: $data');
+    if (data != null) {
+      setState(() {
+        // Update the sensor data with the new reading
+        final index = sensorData
+            .indexWhere((sensor) => sensor['device_id'] == data['device_id']);
+        if (index != -1) {
+          // Update existing sensor data
+          sensorData[index] = {
+            ...sensorData[index],
+            'temperature': data['temperature']?.toString() ?? '--',
+            'battery': data['battery']?.toString() ?? '--',
+            'timestamp': data['timestamp'] ?? DateTime.now().toIso8601String(),
+          };
+        } else {
+          // Add new sensor data
+          sensorData.add({
+            'device_id': data['device_id'],
+            'restaurantName': data['restaurantName'] ?? 'Unknown Restaurant',
+            'temperature': data['temperature']?.toString() ?? '--',
+            'battery': data['battery']?.toString() ?? '--',
+            'timestamp': data['timestamp'] ?? DateTime.now().toIso8601String(),
+          });
+        }
+      });
+    }
   }
 
   // ---------------------------
@@ -89,7 +132,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToCreateIncident() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CreateIncidentPage(token: widget.token)),
+      MaterialPageRoute(
+          builder: (context) => CreateIncidentPage(token: widget.token)),
     );
   }
 
@@ -118,7 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Text(
                 isCompleted ? 'VIEW CHECKLIST' : 'CLICK TO FILL',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -152,7 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: const Text(
                 'CREATE INCIDENT',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -166,33 +212,37 @@ class _HomeScreenState extends State<HomeScreen> {
   // ---------------------------
   Future<void> fetchSensorData() async {
     try {
-      final url = '$baseUrl/user/sensor';
+      final url = '$baseUrl/user/temperatureSetting';
       final response = await http.get(
         Uri.parse(url),
         headers: {'Authorization': 'Bearer ${widget.token}'},
       );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         List<dynamic> sensorRecords = data['data'];
 
-        // Group sensor records by device_id to keep only the latest reading
-        Map<String, Map<String, dynamic>> sensorMap = {};
-        for (var record in sensorRecords) {
-          String deviceId = record['device_id'];
-          DateTime recordTime = DateTime.parse(record['createdAt']);
-          if (!sensorMap.containsKey(deviceId) ||
-              recordTime.isAfter(DateTime.parse(sensorMap[deviceId]!['createdAt']))) {
-            sensorMap[deviceId] = Map<String, dynamic>.from(record);
-          }
-        }
-
+        // Initialize sensor data with basic information from API
         setState(() {
-          sensorData = sensorMap.values.toList();
+          sensorData = sensorRecords
+              .map((record) => {
+                    'device_id': record['sensor_id'],
+                    'restaurantName':
+                        record['restaurant_id']['name'] ?? 'Unknown Restaurant',
+                    'temperature': '--', // Will be updated by socket
+                    'battery': '--', // Will be updated by socket
+                    'timestamp': DateTime.now()
+                        .toIso8601String(), // Will be updated by socket
+                    'min_temp': record['min_temp'] ?? 0,
+                    'max_temp': record['max_temp'] ?? 5,
+                  })
+              .toList();
           isSensorLoading = false;
         });
       } else {
         setState(() {
-          sensorErrorMessage = 'Error fetching sensor data: ${response.statusCode}';
+          sensorErrorMessage =
+              'Error fetching sensor data: ${response.statusCode}';
           isSensorLoading = false;
         });
       }
@@ -209,7 +259,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (sensorErrorMessage != null) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        child: Text(sensorErrorMessage!, style: const TextStyle(color: Colors.red)),
+        child: Text(sensorErrorMessage!,
+            style: const TextStyle(color: Colors.red)),
       );
     }
 
@@ -220,46 +271,95 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    // Build a wrap of boxes for each sensor (latest reading) with friendly names.
-    List<Widget> boxes = [];
-    for (int i = 0; i < sensorData.length; i++) {
-      final sensor = sensorData[i];
-      // Use sensor's name if available; otherwise, assign "Fridge 1", "Fridge 2", etc.
-      final friendlyName = sensor['name'] ?? 'Fridge ${i + 1}';
-      final temperature = sensor['uplink_message']?['decoded_payload']?['temperature']?.toString() ?? '--';
-
-      boxes.add(
-        Container(
-          width: 100,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.green, width: 2),
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                friendlyName.toString().toUpperCase(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$temperature°C',
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: boxes,
+      children: sensorData.map((sensor) {
+        final deviceId = sensor['device_id'] ?? 'Unknown';
+        final restaurantName = sensor['restaurantName'] ?? 'Unknown Restaurant';
+        final temperature = sensor['temperature']?.toString() ?? '--';
+        final battery = sensor['battery']?.toString() ?? '--';
+        final timestamp = sensor['timestamp'] ?? '--';
+        final minTemp = sensor['min_temp'] ?? 0;
+        final maxTemp = sensor['max_temp'] ?? 5;
+        print(minTemp);
+        print(maxTemp);
+        return Container(
+          width: 150,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.green, width: 2),
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                deviceId,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Temperature:'),
+                  Text(
+                    '$temperature°C',
+                    style: TextStyle(
+                      color: _getTemperatureColor(
+                        double.tryParse(temperature) ?? 0,
+                        minTemp,
+                        maxTemp,
+                      ),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Battery:'),
+                  Text(
+                    '$battery%',
+                    style: TextStyle(
+                      color: (double.tryParse(battery) ?? 0) > 20
+                          ? Colors.green
+                          : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Last Updated: ${DateTime.parse(timestamp).toLocal().toString().split('.')[0]}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
+  }
+
+  Color _getTemperatureColor(
+      double temperature, double minTemp, double maxTemp) {
+    if (temperature < minTemp || temperature > maxTemp) {
+      return Colors.red;
+    }
+    return Colors.green;
   }
 
   // ---------------------------
@@ -280,8 +380,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   // Checklist items
-                  _buildChecklistItem('OPENING CHECKS', openingChecklistCompleted, 'opening'),
-                  _buildChecklistItem('CLOSING CHECKS', closingChecklistCompleted, 'closing'),
+                  _buildChecklistItem(
+                      'OPENING CHECKS', openingChecklistCompleted, 'opening'),
+                  _buildChecklistItem(
+                      'CLOSING CHECKS', closingChecklistCompleted, 'closing'),
                   // Incident button
                   _buildIncidentButton(),
                   const SizedBox(height: 20),

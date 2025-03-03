@@ -50,9 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('${Config.baseUrl}/user/login-user'),
+        Uri.parse('${Config.baseUrl}/admin/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': username, 'user_password': password}),
+        body: jsonEncode({'email': username, 'password': password}),
       );
 
       if (response.statusCode == 200) {
@@ -89,7 +89,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 50, 35, 118), // Updated background color
+      backgroundColor:
+          const Color.fromARGB(255, 50, 35, 118), // Updated background color
       body: SingleChildScrollView(
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
@@ -98,11 +99,11 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-            Image.asset(
-              'assets/logo.jpeg',
-              height: 100,
-            ),
-          
+                Image.asset(
+                  'assets/logo.jpeg',
+                  height: 100,
+                ),
+
                 const SizedBox(height: 40),
 
                 // USERNAME TextField

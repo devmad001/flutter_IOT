@@ -7,6 +7,7 @@ import 'create_incident.dart';
 import 'temperature.dart';
 import 'logout.dart';
 import 'team.dart';
+import 'report_page.dart';
 
 class SidebarLayout extends StatefulWidget {
   final Widget content;
@@ -123,6 +124,11 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                       } else if (item['label'] == 'INCIDENTS') {
                         _navigateTo('INCIDENTS',
                             CreateIncidentPage(token: widget.token));
+                      } else if (item['label'] == 'REPORTS') {
+                        _navigateTo(
+                          'REPORTS',
+                          ReportPage(),
+                        );
                       }
                       // Add more cases if needed.
                     },

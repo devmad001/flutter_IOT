@@ -17,7 +17,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
   // --- Sensor Data State ---
   bool sensorLoading = true;
   String? sensorError;
-  List<Map<String, dynamic>> latestSensorData = [];
+  Map<String, dynamic> latestSensorData = {};
 
   // --- Temperature Settings State ---
   bool settingsLoading = true;
@@ -44,7 +44,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       sensorLoading = true;
       sensorError = null;
     });
-    final url = '${Config.baseUrl}/user/sensor';
+    final url = '${Config.baseUrl}/user/sensor/sensor-1';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -52,19 +52,11 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       );
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        List<dynamic> sensorRecords = jsonResponse['data'];
+        final sensorRecords = jsonResponse['data'][0];
         // Group by device_id to pick only the latest reading per sensor.
-        Map<String, Map<String, dynamic>> sensorMap = {};
-        for (var record in sensorRecords) {
-          String deviceId = record['device_id'];
-          DateTime recordTime = DateTime.parse(record['createdAt']);
-          if (!sensorMap.containsKey(deviceId) ||
-              recordTime.isAfter(DateTime.parse(sensorMap[deviceId]!['createdAt']))) {
-            sensorMap[deviceId] = Map<String, dynamic>.from(record);
-          }
-        }
+
         setState(() {
-          latestSensorData = sensorMap.values.toList();
+          latestSensorData = sensorRecords;
           sensorLoading = false;
         });
       } else {
@@ -88,7 +80,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       settingsLoading = true;
       settingsError = null;
     });
-    final url = '${Config.baseUrl}/user/temperatureSetting/self';
+    final url = '${Config.baseUrl}/user/temperatureSetting/';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -96,7 +88,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       );
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        final setting = jsonResponse['data'];
+        final setting = jsonResponse['data'][0];
         setState(() {
           settingId = setting['_id'];
           minTempSetting = (setting['min_temp'] as num).toDouble();
@@ -114,7 +106,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
         });
       } else {
         setState(() {
-          settingsError = 'Error fetching temperature setting: ${response.statusCode}';
+          settingsError =
+              'Error fetching temperature setting: ${response.statusCode}';
           settingsLoading = false;
         });
       }
@@ -133,7 +126,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       settingsSubmitting = true;
     });
     final url = settingId == null
-        ? '${Config.baseUrl}/user/temperatureSetting/self'
+        ? '${Config.baseUrl}/user/temperatureSetting/'
         : '${Config.baseUrl}/user/temperatureSetting/$settingId';
     try {
       http.Response response;
@@ -154,12 +147,15 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
         );
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Temperature setting created successfully')),
+            const SnackBar(
+                content: Text('Temperature setting created successfully')),
           );
           fetchTemperatureSetting();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error creating setting: ${response.statusCode}')),
+            SnackBar(
+                content:
+                    Text('Error creating setting: ${response.statusCode}')),
           );
         }
       } else {
@@ -179,12 +175,15 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
         );
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Temperature setting updated successfully')),
+            const SnackBar(
+                content: Text('Temperature setting updated successfully')),
           );
           fetchTemperatureSetting();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error updating setting: ${response.statusCode}')),
+            SnackBar(
+                content:
+                    Text('Error updating setting: ${response.statusCode}')),
           );
         }
       }
@@ -223,27 +222,30 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
     } else if (latestSensorData.isEmpty) {
       sensorContent = const Center(child: Text('No sensor data available.'));
     } else {
-      sensorContent = ListView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: latestSensorData.length,
-        itemBuilder: (context, index) {
-          final sensor = latestSensorData[index];
-          return Card(
-            margin: const EdgeInsets.all(10),
-            child: ListTile(
-              title: Text("Sensor: ${sensor['device_id']}"),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Temperature: ${sensor['uplink_message']['decoded_payload']['temperature']}°C"),
-                  Text("Battery: ${sensor['uplink_message']['decoded_payload']['battery']}%"),
-                  Text("Last updated: ${formatDateTime(sensor['createdAt'])}"),
-                ],
+      sensorContent = Card(
+        margin: const EdgeInsets.all(10),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Temperature: ${latestSensorData['temperature']}°C",
+                style: const TextStyle(fontSize: 18),
               ),
-            ),
-          );
-        },
+              const SizedBox(height: 8),
+              Text(
+                "Battery: ${latestSensorData['battery']}%",
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Last updated: ${formatDateTime(latestSensorData['createdAt'])}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -260,9 +262,11 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             if (settingsError != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                child: Text(settingsError!, style: const TextStyle(color: Colors.red)),
+                child: Text(settingsError!,
+                    style: const TextStyle(color: Colors.red)),
               ),
-            Text("Min Temperature: ${minTempSetting.toStringAsFixed(1)}°C", style: const TextStyle(fontSize: 16)),
+            Text("Min Temperature: ${minTempSetting.toStringAsFixed(1)}°C",
+                style: const TextStyle(fontSize: 16)),
             Slider(
               value: minTempSetting,
               min: -20, // Now allows negative temperatures.
@@ -279,7 +283,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               },
             ),
             const SizedBox(height: 16),
-            Text("Max Temperature: ${maxTempSetting.toStringAsFixed(1)}°C", style: const TextStyle(fontSize: 16)),
+            Text("Max Temperature: ${maxTempSetting.toStringAsFixed(1)}°C",
+                style: const TextStyle(fontSize: 16)),
             Slider(
               value: maxTempSetting,
               min: 0,
@@ -298,7 +303,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Text("Temperature Alert: ", style: TextStyle(fontSize: 16)),
+                const Text("Temperature Alert: ",
+                    style: TextStyle(fontSize: 16)),
                 Switch(
                   value: alertEnabled,
                   onChanged: (value) {
@@ -310,7 +316,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Text("Delay Before Alert (minutes):", style: const TextStyle(fontSize: 16)),
+            Text("Delay Before Alert (minutes):",
+                style: const TextStyle(fontSize: 16)),
             TextFormField(
               controller: _delayController,
               keyboardType: TextInputType.number,
@@ -329,21 +336,22 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               },
             ),
             const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed: settingsSubmitting ? null : updateTemperatureSetting,
-                child: settingsSubmitting
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text("Save Settings"),
-              ),
-            ),
+            // Center(
+            //   child: ElevatedButton(
+            //     onPressed: settingsSubmitting ? null : updateTemperatureSetting,
+            //     child: settingsSubmitting
+            //         ? const SizedBox(
+            //             width: 24,
+            //             height: 24,
+            //             child: CircularProgressIndicator(
+            //               strokeWidth: 2,
+            //               valueColor:
+            //                   AlwaysStoppedAnimation<Color>(Colors.white),
+            //             ),
+            //           )
+            //         : const Text("Save Settings"),
+            //   ),
+            // ),
           ],
         ),
       );
@@ -365,12 +373,14 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Sensor Readings Section
-              const Text("Sensor Readings", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text("Sensor Readings",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               sensorContent,
               const Divider(height: 32, thickness: 2),
               // Temperature Settings Section
-              const Text("Temperature Settings", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text("Temperature Settings",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               settingsContent,
             ],

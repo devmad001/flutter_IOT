@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:alpha/config.dart';
+import 'home.dart';
 
 class CreateIncidentPage extends StatefulWidget {
   final String token;
@@ -55,7 +56,12 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Incident Created Successfully")),
         );
-        Navigator.pop(context); // Go back to Incident List
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(token: widget.token),
+          ),
+        );
       } else {
         print('Failed to create incident: ${response.body}');
       }

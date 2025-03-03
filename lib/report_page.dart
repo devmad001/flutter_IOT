@@ -3,7 +3,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
 class ReportPage extends StatefulWidget {
-  const ReportPage({super.key});
+  final String token;
+  const ReportPage({Key? key, required this.token}) : super(key: key);
 
   @override
   State<ReportPage> createState() => _ReportPageState();

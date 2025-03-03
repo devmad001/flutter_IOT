@@ -8,6 +8,7 @@ import 'temperature.dart';
 import 'logout.dart';
 import 'team.dart';
 import 'report_page.dart';
+import 'allergy_check.dart';
 
 class SidebarLayout extends StatefulWidget {
   final Widget content;
@@ -34,7 +35,7 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     {'icon': Icons.check_box_outlined, 'label': 'CLOSING CHECKS'},
     {'icon': Icons.thermostat, 'label': 'TEMPERATURES'},
     {'icon': Icons.group, 'label': 'TEAM'},
-    //{'icon': Icons.report, 'label': 'INCIDENTS'},
+    {'icon': Icons.report, 'label': 'INCIDENTS'},
     {'icon': Icons.bar_chart, 'label': 'REPORTS'},
     {'icon': Icons.health_and_safety, 'label': 'ALLERGY CHECK'},
     {'icon': Icons.settings, 'label': 'SETUP'},
@@ -127,7 +128,12 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                       } else if (item['label'] == 'REPORTS') {
                         _navigateTo(
                           'REPORTS',
-                          ReportPage(),
+                          ReportPage(token: widget.token),
+                        );
+                      } else if (item['label'] == 'ALLERGY CHECK') {
+                        _navigateTo(
+                          'ALLERGY CHECK',
+                          AllergyCheckPage(token: widget.token),
                         );
                       }
                       // Add more cases if needed.

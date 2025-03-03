@@ -40,6 +40,7 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   socket_io_client: ^2.0.3+1
   fl_chart: ^0.66.2
+  data_table_2: ^2.5.10
 
 dev_dependencies:
   flutter_test:

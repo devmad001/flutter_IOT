@@ -15,14 +15,15 @@ class CreateIncidentPage extends StatefulWidget {
 class _CreateIncidentPageState extends State<CreateIncidentPage> {
   final _incidentController = TextEditingController();
   final _employeeNameController = TextEditingController();
-  bool _isCritical = false;
+  final _resolutionController = TextEditingController();
   bool _isSubmitting = false;
 
   Future<void> _submitIncident() async {
     final incident = _incidentController.text.trim();
     final employeeName = _employeeNameController.text.trim();
+    final resolution = _resolutionController.text.trim();
 
-    if (incident.isEmpty || employeeName.isEmpty) {
+    if (incident.isEmpty || employeeName.isEmpty || resolution.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
       );
@@ -33,7 +34,8 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
       _isSubmitting = true;
     });
 
-    final url = '${Config.baseUrl}/user/incidents'; // Replace with your backend IP
+    final url =
+        '${Config.baseUrl}/user/incidents'; // Replace with your backend IP
 
     try {
       final response = await http.post(
@@ -45,7 +47,7 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
         body: jsonEncode({
           'incident': incident,
           'employeeName': employeeName,
-          'isCritical': _isCritical,
+          'resolution': resolution,
         }),
       );
 
@@ -80,22 +82,13 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
             ),
             const SizedBox(height: 10),
             TextField(
-              controller: _employeeNameController,
-              decoration: const InputDecoration(labelText: 'Employee Name'),
+              controller: _resolutionController,
+              decoration: const InputDecoration(labelText: 'Resolution'),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                const Text("Critical Incident"),
-                Checkbox(
-                  value: _isCritical,
-                  onChanged: (value) {
-                    setState(() {
-                      _isCritical = value ?? false;
-                    });
-                  },
-                ),
-              ],
+            TextField(
+              controller: _employeeNameController,
+              decoration: const InputDecoration(labelText: 'Employee Name'),
             ),
             const SizedBox(height: 20),
             _isSubmitting

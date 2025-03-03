@@ -3,8 +3,10 @@ import 'home.dart';
 import 'opening_checklist.dart';
 import 'closing_checklist.dart';
 import 'incident.dart';
+import 'create_incident.dart';
 import 'temperature.dart';
 import 'logout.dart';
+import 'team.dart';
 
 class SidebarLayout extends StatefulWidget {
   final Widget content;
@@ -31,7 +33,7 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     {'icon': Icons.check_box_outlined, 'label': 'CLOSING CHECKS'},
     {'icon': Icons.thermostat, 'label': 'TEMPERATURES'},
     {'icon': Icons.group, 'label': 'TEAM'},
-    {'icon': Icons.report, 'label': 'INCIDENTS'},
+    //{'icon': Icons.report, 'label': 'INCIDENTS'},
     {'icon': Icons.bar_chart, 'label': 'REPORTS'},
     {'icon': Icons.health_and_safety, 'label': 'ALLERGY CHECK'},
     {'icon': Icons.settings, 'label': 'SETUP'},
@@ -113,9 +115,14 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                           'TEMPERATURES',
                           TemperatureScreen(token: widget.token),
                         );
-                      } else if (item['label'] == 'INCIDENTS') {
+                      } else if (item['label'] == 'TEAM') {
                         _navigateTo(
-                            'INCIDENTS', IncidentPage(token: widget.token));
+                          'TEAM',
+                          TeamScreen(token: widget.token),
+                        );
+                      } else if (item['label'] == 'INCIDENTS') {
+                        _navigateTo('INCIDENTS',
+                            CreateIncidentPage(token: widget.token));
                       }
                       // Add more cases if needed.
                     },

@@ -18,6 +18,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
   bool sensorLoading = true;
   String? sensorError;
   Map<String, dynamic> latestSensorData = {};
+  String? selectedSensorId;
 
   // --- Temperature Settings State ---
   bool settingsLoading = true;
@@ -28,23 +29,27 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
   bool alertEnabled = false;
   int delayBeforeAlert = 0;
   String? settingId; // Will be non-null if a setting exists
+  List<Map<String, dynamic>> temperatureSettings =
+      []; // New state variable for list of settings
   final TextEditingController _delayController = TextEditingController();
   final _settingsFormKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    fetchSensorData();
+
     fetchTemperatureSetting();
   }
 
   // --- Sensor Data Functions ---
   Future<void> fetchSensorData() async {
+    if (selectedSensorId == null) return;
+
     setState(() {
       sensorLoading = true;
       sensorError = null;
     });
-    final url = '${Config.baseUrl}/user/sensor/sensor-1';
+    final url = '${Config.baseUrl}/user/sensor/$selectedSensorId';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -53,7 +58,6 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final sensorRecords = jsonResponse['data'][0];
-        // Group by device_id to pick only the latest reading per sensor.
 
         setState(() {
           latestSensorData = sensorRecords;
@@ -88,18 +92,28 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       );
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        final setting = jsonResponse['data'][0];
-        setState(() {
-          settingId = setting['_id'];
-          minTempSetting = (setting['min_temp'] as num).toDouble();
-          maxTempSetting = (setting['max_temp'] as num).toDouble();
-          alertEnabled = setting['alert'] as bool;
-          delayBeforeAlert = setting['delay_before_alert'] as int;
-          _delayController.text = delayBeforeAlert.toString();
-          settingsLoading = false;
-        });
+        final settings = jsonResponse['data'];
+
+        if (settings != null && settings.isNotEmpty) {
+          setState(() {
+            temperatureSettings = List<Map<String, dynamic>>.from(settings);
+            // Set the first setting as the current one
+            final firstSetting = settings[0];
+            settingId = firstSetting['_id'];
+            minTempSetting = (firstSetting['min_temp'] as num).toDouble();
+            maxTempSetting = (firstSetting['max_temp'] as num).toDouble();
+            alertEnabled = firstSetting['alert'] as bool;
+            delayBeforeAlert = firstSetting['delay_before_alert'] as int;
+            _delayController.text = delayBeforeAlert.toString();
+            settingsLoading = false;
+          });
+        } else {
+          setState(() {
+            settingsError = 'No temperature settings found. Create one below.';
+            settingsLoading = false;
+          });
+        }
       } else if (response.statusCode == 404) {
-        // No setting exists; allow creation.
         setState(() {
           settingsError = 'No temperature setting found. Create one below.';
           settingsLoading = false;
@@ -138,7 +152,11 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
   Widget build(BuildContext context) {
     // Sensor Readings Section
     Widget sensorContent;
-    if (sensorLoading) {
+    if (selectedSensorId == null) {
+      sensorContent = const Center(
+        child: Text('Select a sensor from the list above to view details.'),
+      );
+    } else if (sensorLoading) {
       sensorContent = const Center(child: CircularProgressIndicator());
     } else if (sensorError != null) {
       sensorContent = Center(child: Text(sensorError!));
@@ -152,6 +170,12 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                "Sensor ID: ${selectedSensorId}",
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
               Text(
                 "Temperature: ${latestSensorData['temperature']}°C",
                 style: const TextStyle(fontSize: 18),
@@ -172,12 +196,79 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       );
     }
 
-    // Temperature Settings Form Section
-    Widget settingsContent;
+    // Temperature Settings List Section
+    Widget settingsListContent;
     if (settingsLoading) {
-      settingsContent = const Center(child: CircularProgressIndicator());
+      settingsListContent = const Center(child: CircularProgressIndicator());
+    } else if (temperatureSettings.isEmpty) {
+      settingsListContent = const Center(
+        child: Text('No temperature settings available.'),
+      );
     } else {
-      settingsContent = Form(
+      settingsListContent = ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: temperatureSettings.length,
+        itemBuilder: (context, index) {
+          final setting = temperatureSettings[index];
+          final isSelected = settingId == setting['_id'];
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            color: isSelected ? Colors.blue.withOpacity(0.1) : null,
+            child: ListTile(
+              leading: Icon(
+                Icons.thermostat,
+                color: isSelected ? Colors.blue : Colors.grey,
+              ),
+              title: Text(
+                "  ${setting['sensor_id']}",
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.blue : null,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Min: ${setting['min_temp']}°C, Max: ${setting['max_temp']}°C",
+                  ),
+                  Text(
+                    "Alert: ${setting['alert'] ? 'Enabled' : 'Disabled'}",
+                    style: TextStyle(
+                      color: setting['alert'] ? Colors.red : Colors.grey,
+                    ),
+                  ),
+                  Text(
+                    "Delay: ${setting['delay_before_alert']} minutes",
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+              onTap: () {
+                setState(() {
+                  settingId = setting['_id'];
+                  selectedSensorId = setting['sensor_id'];
+                  minTempSetting = (setting['min_temp'] as num).toDouble();
+                  maxTempSetting = (setting['max_temp'] as num).toDouble();
+                  alertEnabled = setting['alert'] as bool;
+                  delayBeforeAlert = setting['delay_before_alert'] as int;
+                  _delayController.text = delayBeforeAlert.toString();
+                });
+                fetchSensorData();
+              },
+            ),
+          );
+        },
+      );
+    }
+
+    // Temperature Settings Form Section
+    Widget settingsFormContent;
+    if (settingsLoading) {
+      settingsFormContent = const Center(child: CircularProgressIndicator());
+    } else {
+      settingsFormContent = Form(
         key: _settingsFormKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,9 +283,9 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                 style: const TextStyle(fontSize: 16)),
             Slider(
               value: minTempSetting,
-              min: -20, // Now allows negative temperatures.
-              max: 30,
-              divisions: 50, // (30 - (-20)) = 50 steps
+              min: -20,
+              max: 100,
+              divisions: 50,
               label: minTempSetting.toStringAsFixed(1),
               onChanged: (value) {
                 setState(() {
@@ -211,7 +302,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             Slider(
               value: maxTempSetting,
               min: 0,
-              max: 50,
+              max: 100,
               divisions: 50,
               label: maxTempSetting.toStringAsFixed(1),
               onChanged: (value) {
@@ -259,22 +350,6 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               },
             ),
             const SizedBox(height: 24),
-            // Center(
-            //   child: ElevatedButton(
-            //     onPressed: settingsSubmitting ? null : updateTemperatureSetting,
-            //     child: settingsSubmitting
-            //         ? const SizedBox(
-            //             width: 24,
-            //             height: 24,
-            //             child: CircularProgressIndicator(
-            //               strokeWidth: 2,
-            //               valueColor:
-            //                   AlwaysStoppedAnimation<Color>(Colors.white),
-            //             ),
-            //           )
-            //         : const Text("Save Settings"),
-            //   ),
-            // ),
           ],
         ),
       );
@@ -296,16 +371,22 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Sensor Readings Section
-              const Text("Sensor Readings",
+              const Text("Sensor List",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              settingsListContent,
+              const Divider(height: 32, thickness: 2),
+              // Temperature Settings List Section
+              const Text("Current State",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               sensorContent,
               const Divider(height: 32, thickness: 2),
-              // Temperature Settings Section
-              const Text("Temperature Settings",
+              // Temperature Settings Form Section
+              const Text("Temperature Setting",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              settingsContent,
+              settingsFormContent,
             ],
           ),
         ),

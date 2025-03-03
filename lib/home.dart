@@ -7,6 +7,7 @@ import 'create_incident.dart';
 import 'sidebar_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'socket_service.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 final baseUrl = dotenv.env['BASE_URL'];
 
@@ -30,6 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
   String? sensorErrorMessage;
   List<Map<String, dynamic>> sensorData = [];
 
+  // Date range for temperature history
+  DateTimeRange? selectedDateRange;
+  List<Map<String, dynamic>> temperatureHistory = [];
+  bool isHistoryLoading = false;
+
+  // Add new state for chart data
+  List<String> chartLabels = [];
+  Map<String, List<double>> temperatureDataByDevice = {};
+  List<Color> chartColors = [
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -52,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _handleSensorUpdate(dynamic data) {
-    print('Sensor update received: $data');
     if (data != null) {
       setState(() {
         // Update the sensor data with the new reading
@@ -282,8 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final timestamp = sensor['timestamp'] ?? '--';
         final minTemp = sensor['min_temp'] ?? 0;
         final maxTemp = sensor['max_temp'] ?? 5;
-        print(minTemp);
-        print(maxTemp);
+
         return Container(
           width: 150,
           padding: const EdgeInsets.all(12),
@@ -362,6 +377,284 @@ class _HomeScreenState extends State<HomeScreen> {
     return Colors.green;
   }
 
+  Future<void> fetchTemperatureHistory() async {
+    if (selectedDateRange == null) return;
+
+    setState(() {
+      isHistoryLoading = true;
+    });
+
+    try {
+      final startDate = selectedDateRange!.start.toIso8601String();
+      final endDate = selectedDateRange!.end.toIso8601String();
+
+      final url = Uri.parse('$baseUrl/user/average-daily-temperature')
+          .replace(queryParameters: {
+        'startDate': startDate,
+        'endDate': endDate,
+      });
+
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> sensorData = data;
+
+        // Create temporary variables for processing
+        final List<String> newLabels = [];
+        final Map<String, List<double>> newDataByDevice = {};
+
+        // First pass: collect all unique dates
+        for (var item in sensorData) {
+          final date = item['_id']['date'];
+          if (!newLabels.contains(date)) {
+            newLabels.add(date);
+          }
+        }
+
+        // Sort dates chronologically
+        newLabels.sort();
+
+        // Second pass: process data for each device
+        for (var item in sensorData) {
+          final date = item['_id']['date'];
+          final deviceId = item['_id']['device_id'];
+          final avgTemp = double.parse(item['averageTemperature'].toString());
+
+          // Initialize device data array if not exists
+          if (!newDataByDevice.containsKey(deviceId)) {
+            newDataByDevice[deviceId] = List.filled(newLabels.length, 0.0);
+          }
+
+          // Update device data at the correct index
+          final dateIndex = newLabels.indexOf(date);
+          newDataByDevice[deviceId]![dateIndex] = avgTemp;
+        }
+
+        // Update state with processed data
+        setState(() {
+          temperatureHistory = List<Map<String, dynamic>>.from(sensorData);
+          chartLabels = newLabels;
+          temperatureDataByDevice = newDataByDevice;
+          isHistoryLoading = false;
+        });
+      } else {
+        setState(() {
+          isHistoryLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Error fetching temperature history: ${response.statusCode}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        isHistoryLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildTemperatureHistoryChart() {
+    // Set default date range if not selected
+    if (selectedDateRange == null) {
+      selectedDateRange = DateTimeRange(
+        start: DateTime.now().subtract(const Duration(days: 8)),
+        end: DateTime.now(),
+      );
+      // Fetch initial data
+      fetchTemperatureHistory();
+    }
+    print(temperatureDataByDevice);
+    // Generate line chart data for each device
+    final lineBarsData = temperatureDataByDevice.entries.map((entry) {
+      final deviceId = entry.key;
+      final data = entry.value;
+      final colorIndex =
+          temperatureDataByDevice.keys.toList().indexOf(deviceId) %
+              chartColors.length;
+      final color = chartColors[colorIndex];
+
+      return LineChartBarData(
+        spots: data.asMap().entries.map((e) {
+          return FlSpot(e.key.toDouble(), e.value);
+        }).toList(),
+        isCurved: true,
+        color: color,
+        barWidth: 3,
+        isStrokeCapRound: true,
+        dotData: FlDotData(show: true),
+        belowBarData: BarAreaData(
+          show: true,
+          color: color.withOpacity(0.2),
+        ),
+      );
+    }).toList();
+
+    return Container(
+      height: 400,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Temperature History',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  final DateTimeRange? picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                    initialDateRange: selectedDateRange,
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      selectedDateRange = picked;
+                    });
+                    // Fetch new data when date range changes
+                    fetchTemperatureHistory();
+                  }
+                },
+                icon: const Icon(Icons.calendar_today),
+                label: Text(
+                  '${selectedDateRange!.start.day}/${selectedDateRange!.start.month}/${selectedDateRange!.start.year} - '
+                  '${selectedDateRange!.end.day}/${selectedDateRange!.end.month}/${selectedDateRange!.end.year}',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // Add legend
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: temperatureDataByDevice.keys.map((deviceId) {
+              final colorIndex =
+                  temperatureDataByDevice.keys.toList().indexOf(deviceId) %
+                      chartColors.length;
+              final color = chartColors[colorIndex];
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    deviceId,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: isHistoryLoading
+                ? const Center(child: CircularProgressIndicator())
+                : LineChart(
+                    LineChartData(
+                      gridData: FlGridData(show: true),
+                      titlesData: FlTitlesData(
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 40,
+                            getTitlesWidget: (value, meta) {
+                              return Text('${value.toStringAsFixed(1)}°C');
+                            },
+                          ),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) {
+                              if (value.toInt() >= 0 &&
+                                  value.toInt() < chartLabels.length) {
+                                final date =
+                                    DateTime.parse(chartLabels[value.toInt()]);
+                                return Text('${date.day}/${date.month}');
+                              }
+                              return const Text('');
+                            },
+                          ),
+                        ),
+                        rightTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                        topTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false)),
+                      ),
+                      borderData: FlBorderData(show: true),
+                      lineBarsData: lineBarsData,
+                      lineTouchData: LineTouchData(
+                        touchTooltipData: LineTouchTooltipData(
+                          tooltipBgColor: Colors.blueGrey,
+                          getTooltipItems: (touchedSpots) {
+                            return touchedSpots.map((spot) {
+                              final deviceId = temperatureDataByDevice.keys
+                                  .elementAt(spot.barIndex);
+                              final color = chartColors[
+                                  spot.barIndex % chartColors.length];
+                              return LineTooltipItem(
+                                '$deviceId\n${spot.y.toStringAsFixed(2)}°C',
+                                TextStyle(
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            }).toList();
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ---------------------------
   // BUILD METHOD
   // ---------------------------
@@ -389,6 +682,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 20),
                   // Sensor boxes showing latest sensor data with friendly names
                   _buildSensorBoxes(),
+                  const SizedBox(height: 20),
+                  // Temperature history chart
+                  _buildTemperatureHistoryChart(),
                 ],
               ),
             ),

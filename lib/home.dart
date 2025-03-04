@@ -296,8 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final temperature = sensor['temperature']?.toString() ?? '--';
         final battery = sensor['battery']?.toString() ?? '--';
         final timestamp = sensor['timestamp'] ?? '--';
-        final minTemp = sensor['min_temp'] ?? 0;
-        final maxTemp = sensor['max_temp'] ?? 5;
+        final minTemp = (sensor['min_temp'] ?? 0).toDouble();
+        final maxTemp = (sensor['max_temp'] ?? 5).toDouble();
 
         return Container(
           width: 150,
@@ -492,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       return LineChartBarData(
         spots: data.asMap().entries.map((e) {
-          return FlSpot(e.key.toDouble(), e.value);
+          return FlSpot(e.key.toDouble(), e.value.toDouble());
         }).toList(),
         isCurved: true,
         color: color,

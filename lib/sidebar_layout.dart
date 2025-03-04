@@ -9,6 +9,7 @@ import 'logout.dart';
 import 'team.dart';
 import 'report_page.dart';
 import 'allergy_check.dart';
+import 'setup.dart';
 
 class SidebarLayout extends StatefulWidget {
   final Widget content;
@@ -134,6 +135,11 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                         _navigateTo(
                           'ALLERGY CHECK',
                           AllergyCheckPage(token: widget.token),
+                        );
+                      } else if (item['label'] == 'SETUP') {
+                        _navigateTo(
+                          'SETUP',
+                          SetupPage(token: widget.token),
                         );
                       }
                       // Add more cases if needed.

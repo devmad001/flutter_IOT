@@ -3,7 +3,13 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:alpha/config.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ReportPage extends StatefulWidget {
   final String token;
@@ -63,6 +69,16 @@ class _ReportPageState extends State<ReportPage> {
     });
 
     try {
+      // Request storage permission
+      var status = await Permission.storage.status;
+      if (!status.isGranted) {
+        status = await Permission.storage.request();
+      }
+
+      if (!status.isGranted) {
+        throw Exception('Storage permission is required to save the report');
+      }
+
       final url = Uri.parse('${Config.baseUrl}/user/report/pdf').replace(
         queryParameters: {
           'startDate': _rangeStart!.toIso8601String(),
@@ -78,8 +94,63 @@ class _ReportPageState extends State<ReportPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        // Handle the report data here
-        // For example, you could save it to a file or show it in a dialog
+
+        // Create PDF document
+        final pdf = pw.Document();
+
+        // Add content to PDF
+        pdf.addPage(
+          pw.MultiPage(
+            build: (context) => [
+              pw.Header(
+                level: 0,
+                child: pw.Text(
+                  'Report for ${DateFormat('MMM dd, yyyy').format(_rangeStart!)} - ${DateFormat('MMM dd, yyyy').format(_rangeEnd!)}',
+                  style: pw.TextStyle(
+                      fontSize: 20, fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.SizedBox(height: 20),
+              pw.Text('Opening Checks',
+                  style: pw.TextStyle(
+                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(data['openingChecks']?.toString() ?? 'No data available'),
+              pw.SizedBox(height: 10),
+              pw.Text('Closing Checks',
+                  style: pw.TextStyle(
+                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(data['closingChecks']?.toString() ?? 'No data available'),
+              pw.SizedBox(height: 10),
+              pw.Text('Temperature Readings',
+                  style: pw.TextStyle(
+                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(data['temperatureReadings']?.toString() ??
+                  'No data available'),
+              pw.SizedBox(height: 10),
+              pw.Text('Incidents Logged',
+                  style: pw.TextStyle(
+                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text(data['incidents']?.toString() ?? 'No data available'),
+            ],
+          ),
+        );
+
+        // Save PDF to file
+        final output = await getExternalStorageDirectory();
+        if (output == null) {
+          throw Exception('Could not access external storage');
+        }
+
+        final fileName = 'report_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final file = File('${output.path}/$fileName');
+        await file.writeAsBytes(await pdf.save());
+
+        // Open the PDF file
+        final result = await OpenFile.open(file.path);
+        if (result.type != ResultType.done) {
+          throw Exception('Could not open the PDF file');
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Report downloaded successfully')),
         );

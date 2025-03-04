@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:alpha/config.dart';
 import 'dart:convert';
+import 'package:guardstar/config.dart';
+import 'package:guardstar/sidebar_layout.dart';
 
 class OpeningChecklistPage extends StatefulWidget {
   final String token;

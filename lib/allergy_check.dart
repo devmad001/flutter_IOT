@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:alpha/allergy_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:guardstar/config.dart';
+import 'package:guardstar/sidebar_layout.dart';
+import 'package:guardstar/allergy_service.dart';
 
 class AllergyCheckPage extends StatefulWidget {
   final String token;

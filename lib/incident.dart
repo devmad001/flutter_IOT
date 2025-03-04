@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart'; // For formatting date & time
 import 'create_incident.dart'; // Import the form page
-import 'package:alpha/config.dart';
+import 'package:guardstar/config.dart';
 
 class IncidentPage extends StatefulWidget {
   final String token;
@@ -144,7 +144,8 @@ class _IncidentPageState extends State<IncidentPage> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Confirm Delete'),
-          content: const Text('Are you sure you want to delete this incident? This action cannot be undone.'),
+          content: const Text(
+              'Are you sure you want to delete this incident? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -171,7 +172,8 @@ class _IncidentPageState extends State<IncidentPage> {
 
   String formatDateTime(String dateTimeString) {
     DateTime dateTime = DateTime.parse(dateTimeString);
-    return DateFormat('yyyy-MM-dd hh:mm a').format(dateTime); // Format date & time
+    return DateFormat('yyyy-MM-dd hh:mm a')
+        .format(dateTime); // Format date & time
   }
 
   @override
@@ -191,12 +193,16 @@ class _IncidentPageState extends State<IncidentPage> {
                     itemCount: incidents.length,
                     itemBuilder: (context, index) {
                       final incident = incidents[index];
-                      String formattedDate = formatDateTime(incident['reportedAt']);
+                      String formattedDate =
+                          formatDateTime(incident['reportedAt']);
                       bool isResolved = incident['status'] == 'Resolved';
 
                       return Card(
                         margin: const EdgeInsets.all(8),
-                        color: isResolved ? Colors.green[100] : Colors.red[100], // Green for resolved, Red for unresolved
+                        color: isResolved
+                            ? Colors.green[100]
+                            : Colors.red[
+                                100], // Green for resolved, Red for unresolved
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Column(
@@ -206,7 +212,9 @@ class _IncidentPageState extends State<IncidentPage> {
                                 incident['incident'],
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: isResolved ? Colors.green[800] : Colors.red[800],
+                                  color: isResolved
+                                      ? Colors.green[800]
+                                      : Colors.red[800],
                                   fontSize: 18,
                                 ),
                               ),
@@ -215,15 +223,18 @@ class _IncidentPageState extends State<IncidentPage> {
                               if (isResolved)
                                 Text(
                                   "Resolution: ${incident['resolution'] ?? 'N/A'}",
-                                  style: const TextStyle(fontStyle: FontStyle.italic),
+                                  style: const TextStyle(
+                                      fontStyle: FontStyle.italic),
                                 ),
                               const SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     formattedDate,
-                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.grey),
                                   ),
                                   Row(
                                     children: [
@@ -231,13 +242,16 @@ class _IncidentPageState extends State<IncidentPage> {
                                         value: isResolved,
                                         onChanged: (value) {
                                           if (value != null) {
-                                            updateIncidentStatus(incident['_id'], value);
+                                            updateIncidentStatus(
+                                                incident['_id'], value);
                                           }
                                         },
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red),
-                                        onPressed: () => deleteIncident(incident['_id']),
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () =>
+                                            deleteIncident(incident['_id']),
                                       ),
                                     ],
                                   ),

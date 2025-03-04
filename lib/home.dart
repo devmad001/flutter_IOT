@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'opening_checklist.dart';
-import 'closing_checklist.dart';
-import 'create_incident.dart';
-import 'sidebar_layout.dart';
+import 'package:guardstar/opening_checklist.dart';
+import 'package:guardstar/closing_checklist.dart';
+import 'package:guardstar/create_incident.dart';
+import 'package:guardstar/sidebar_layout.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'socket_service.dart';
+import 'package:guardstar/socket_service.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:guardstar/widgets/app_bar.dart';
 
 final baseUrl = dotenv.env['BASE_URL'];
 
@@ -154,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildChecklistItem(String title, bool isCompleted, String section) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: () => _navigateTo(section),
       child: Container(
@@ -177,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Text(
-                isCompleted ? 'VIEW CHECKLIST' : 'CLICK TO FILL',
+                isCompleted ? l10n.viewChecklist : l10n.clickToFill,
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -189,6 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildIncidentButton() {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: _navigateToCreateIncident,
       child: Container(
@@ -201,9 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'ADD INCIDENT',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.addIncident,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -211,10 +215,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.blue,
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: const Text(
-                'CREATE INCIDENT',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              child: Text(
+                l10n.createIncident,
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -660,12 +664,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // ---------------------------
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // If either checklist or sensor data is still loading, show a loader.
     final isAnyLoading = isLoading || isSensorLoading;
 
     return SidebarLayout(
       token: widget.token,
-      title: 'HOME',
+      title: l10n.home,
       content: isAnyLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -673,10 +678,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   // Checklist items
-                  _buildChecklistItem(
-                      'OPENING CHECKS', openingChecklistCompleted, 'opening'),
-                  _buildChecklistItem(
-                      'CLOSING CHECKS', closingChecklistCompleted, 'closing'),
+                  _buildChecklistItem(l10n.openingChecklist,
+                      openingChecklistCompleted, 'opening'),
+                  _buildChecklistItem(l10n.closingChecklist,
+                      closingChecklistCompleted, 'closing'),
                   // Incident button
                   _buildIncidentButton(),
                   const SizedBox(height: 20),

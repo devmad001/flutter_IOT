@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:alpha/config.dart';
+import 'package:guardstar/config.dart';
+import 'package:guardstar/sidebar_layout.dart';
 
 class ClosingChecklistPage extends StatefulWidget {
   final String token;

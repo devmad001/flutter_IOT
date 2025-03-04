@@ -10,6 +10,7 @@ import 'team.dart';
 import 'report_page.dart';
 import 'allergy_check.dart';
 import 'setup.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SidebarLayout extends StatefulWidget {
   final Widget content;
@@ -30,17 +31,19 @@ class SidebarLayout extends StatefulWidget {
 class _SidebarLayoutState extends State<SidebarLayout> {
   String selectedMenu = '';
 
-  final List<Map<String, dynamic>> _menuItems = [
-    {'icon': Icons.home, 'label': 'HOME'},
-    {'icon': Icons.check_box, 'label': 'OPENING CHECKS'},
-    {'icon': Icons.check_box_outlined, 'label': 'CLOSING CHECKS'},
-    {'icon': Icons.thermostat, 'label': 'TEMPERATURES'},
-    {'icon': Icons.group, 'label': 'TEAM'},
-    {'icon': Icons.report, 'label': 'INCIDENTS'},
-    {'icon': Icons.bar_chart, 'label': 'REPORTS'},
-    {'icon': Icons.health_and_safety, 'label': 'ALLERGY CHECK'},
-    {'icon': Icons.settings, 'label': 'SETUP'},
-  ];
+  List<Map<String, dynamic>> _getMenuItems(AppLocalizations l10n) {
+    return [
+      {'icon': Icons.home, 'label': l10n.menuHome},
+      {'icon': Icons.check_box, 'label': l10n.menuOpeningChecks},
+      {'icon': Icons.check_box_outlined, 'label': l10n.menuClosingChecks},
+      {'icon': Icons.thermostat, 'label': l10n.menuTemperatures},
+      {'icon': Icons.group, 'label': l10n.menuTeam},
+      {'icon': Icons.report, 'label': l10n.menuIncidents},
+      {'icon': Icons.bar_chart, 'label': l10n.menuReports},
+      {'icon': Icons.health_and_safety, 'label': l10n.menuAllergyCheck},
+      {'icon': Icons.settings, 'label': l10n.menuSetup},
+    ];
+  }
 
   void _navigateTo(String label, Widget page, {bool isHome = false}) {
     if (selectedMenu == label) return;
@@ -78,6 +81,9 @@ class _SidebarLayoutState extends State<SidebarLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final menuItems = _getMenuItems(l10n);
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
       drawer: Drawer(
@@ -95,7 +101,7 @@ class _SidebarLayoutState extends State<SidebarLayout> {
             ),
             Expanded(
               child: ListView(
-                children: _menuItems.map((item) {
+                children: menuItems.map((item) {
                   return ListTile(
                     leading: Icon(item['icon'], color: Colors.blue[900]),
                     title: Text(item['label']),
@@ -105,44 +111,44 @@ class _SidebarLayoutState extends State<SidebarLayout> {
                       // Close the drawer before navigating.
                       Navigator.pop(context);
 
-                      if (item['label'] == 'HOME') {
-                        _navigateTo('HOME', const SizedBox(), isHome: true);
-                      } else if (item['label'] == 'OPENING CHECKS') {
-                        _navigateTo('OPENING CHECKS',
+                      if (item['label'] == l10n.menuHome) {
+                        _navigateTo(l10n.menuHome, const SizedBox(),
+                            isHome: true);
+                      } else if (item['label'] == l10n.menuOpeningChecks) {
+                        _navigateTo(l10n.menuOpeningChecks,
                             OpeningChecklistPage(token: widget.token));
-                      } else if (item['label'] == 'CLOSING CHECKS') {
-                        _navigateTo('CLOSING CHECKS',
+                      } else if (item['label'] == l10n.menuClosingChecks) {
+                        _navigateTo(l10n.menuClosingChecks,
                             ClosingChecklistPage(token: widget.token));
-                      } else if (item['label'] == 'TEMPERATURES') {
+                      } else if (item['label'] == l10n.menuTemperatures) {
                         _navigateTo(
-                          'TEMPERATURES',
+                          l10n.menuTemperatures,
                           TemperatureScreen(token: widget.token),
                         );
-                      } else if (item['label'] == 'TEAM') {
+                      } else if (item['label'] == l10n.menuTeam) {
                         _navigateTo(
-                          'TEAM',
+                          l10n.menuTeam,
                           TeamScreen(token: widget.token),
                         );
-                      } else if (item['label'] == 'INCIDENTS') {
-                        _navigateTo('INCIDENTS',
+                      } else if (item['label'] == l10n.menuIncidents) {
+                        _navigateTo(l10n.menuIncidents,
                             CreateIncidentPage(token: widget.token));
-                      } else if (item['label'] == 'REPORTS') {
+                      } else if (item['label'] == l10n.menuReports) {
                         _navigateTo(
-                          'REPORTS',
+                          l10n.menuReports,
                           ReportPage(token: widget.token),
                         );
-                      } else if (item['label'] == 'ALLERGY CHECK') {
+                      } else if (item['label'] == l10n.menuAllergyCheck) {
                         _navigateTo(
-                          'ALLERGY CHECK',
+                          l10n.menuAllergyCheck,
                           AllergyCheckPage(token: widget.token),
                         );
-                      } else if (item['label'] == 'SETUP') {
+                      } else if (item['label'] == l10n.menuSetup) {
                         _navigateTo(
-                          'SETUP',
+                          l10n.menuSetup,
                           SetupPage(token: widget.token),
                         );
                       }
-                      // Add more cases if needed.
                     },
                   );
                 }).toList(),
@@ -151,7 +157,8 @@ class _SidebarLayoutState extends State<SidebarLayout> {
             const Divider(),
             ListTile(
                 leading: Icon(Icons.logout, color: Colors.red[700]),
-                title: Text('LOGOUT', style: TextStyle(color: Colors.red[700])),
+                title: Text(l10n.menuLogout,
+                    style: TextStyle(color: Colors.red[700])),
                 onTap: () {
                   Navigator.pop(context); // close the drawer
                   Navigator.pushReplacement(

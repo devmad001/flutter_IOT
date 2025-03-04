@@ -36,15 +36,15 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
             // Add proguard rules to keep the missing classes
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            
         }
     }
 }
 
-dependencies {
-    implementation 'com.google.errorprone:error_prone_annotations:2.20.0'
-    implementation 'com.google.code.findbugs:jsr305:3.0.2'
-}
+// dependencies {
+//     implementation 'com.google.errorprone:error_prone_annotations:2.20.0'
+//     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+// }
 
 flutter {
     source = "../.."

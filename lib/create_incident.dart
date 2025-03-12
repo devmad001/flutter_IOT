@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:guardstar/config.dart';
 import 'home.dart';
+import 'incident.dart';
+import 'package:guardstar/sidebar_layout.dart';
 
 class CreateIncidentPage extends StatefulWidget {
   final String token;
@@ -24,12 +26,12 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
     final employeeName = _employeeNameController.text.trim();
     final resolution = _resolutionController.text.trim();
 
-    if (incident.isEmpty || employeeName.isEmpty || resolution.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
-      return;
-    }
+    // if (incident.isEmpty || employeeName.isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text("Please fill all fields")),
+    //   );
+    //   return;
+    // }
 
     setState(() {
       _isSubmitting = true;
@@ -51,20 +53,11 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
           'resolution': resolution,
         }),
       );
-
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
+       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Incident Created Successfully")),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(token: widget.token),
-          ),
-        );
-      } else {
-        print('Failed to create incident: ${response.body}');
-      }
+      Navigator.pop(context);
+       
     } catch (e) {
       print('Error creating incident: $e');
     } finally {

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:guardstar/config.dart';
 import 'package:guardstar/sidebar_layout.dart';
 import 'package:guardstar/allergy_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AllergyCheckPage extends StatefulWidget {
   final String token;
@@ -23,9 +24,10 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
   Map<String, dynamic>? _results;
 
   Future<void> _handleSearch() async {
+    final l10n = AppLocalizations.of(context)!;
     if (_allergensController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter allergens to check')),
+        SnackBar(content: Text(l10n.pleaseEnterAllergens)),
       );
       return;
     }
@@ -77,25 +79,24 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Allergy Check'),
-      ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(
+            top: 46.0, left: 16.0, right: 16.0, bottom: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Search Section
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'CUSTOMER ALLERGY',
-                      style: TextStyle(
+                    Text(
+                      l10n.customerAllergy,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -106,16 +107,17 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
                         Expanded(
                           child: TextField(
                             controller: _allergensController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter allergens',
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              hintText: l10n.enterAllergens,
+                              border: const OutlineInputBorder(),
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: _isLoading ? null : _handleSearch,
-                          child: Text(_isLoading ? 'Searching...' : 'Search'),
+                          child:
+                              Text(_isLoading ? l10n.searching : l10n.search),
                         ),
                       ],
                     ),
@@ -124,7 +126,6 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
               ),
             ),
             const SizedBox(height: 24),
-            // Results Section
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_results != null)
@@ -134,12 +135,12 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildResultSection(
-                        'RESULTS NOT INCLUDING ALLERGY INGREDIENT',
+                        l10n.safeItems,
                         List<String>.from(_results!['safeItems'] ?? []),
                       ),
                       const SizedBox(height: 24),
                       _buildResultSection(
-                        'RESULTS INCLUDING ALLERGY INGREDIENT',
+                        l10n.unsafeItems,
                         List<String>.from(_results!['unsafeItems'] ?? []),
                       ),
                     ],

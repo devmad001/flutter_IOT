@@ -9,23 +9,33 @@ class LanguageSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<LanguageProvider>(
       builder: (context, languageProvider, child) {
-        return PopupMenuButton<String>(
-          icon: const Icon(Icons.language),
-          onSelected: (String languageCode) {
-            languageProvider.changeLanguage(languageCode);
+        return DropdownButton<String>(
+          value: languageProvider.currentLocale.languageCode,
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              languageProvider.changeLanguage(newValue);
+            }
           },
-          itemBuilder: (BuildContext context) => [
-            const PopupMenuItem<String>(
+          items: const [
+            DropdownMenuItem<String>(
               value: 'en',
               child: Text('English'),
             ),
-            const PopupMenuItem<String>(
+            DropdownMenuItem<String>(
               value: 'zh',
               child: Text('中文'),
             ),
-            const PopupMenuItem<String>(
+            DropdownMenuItem<String>(
               value: 'pl',
               child: Text('Polski'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'it',
+              child: Text('Italiano'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'tr',
+              child: Text('Türkçe'),
             ),
           ],
         );

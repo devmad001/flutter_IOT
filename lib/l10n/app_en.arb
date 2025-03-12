@@ -38,7 +38,16 @@
     "closingChecklist": "Closing Checklist",
     "unknownRestaurant": "Unknown Restaurant",
     "battery": "Battery",
-    "lastUpdated": "Last Updated",
+    "lastUpdated": "Last updated: {datetime}",
+    "@lastUpdated": {
+        "description": "Last updated label with datetime",
+        "placeholders": {
+            "datetime": {
+                "type": "String",
+                "example": "2024-01-01 12:00:00"
+            }
+        }
+    },
     "selectDateRange": "Select Date Range",
     "noTemperatureData": "No temperature data available for the selected date range",
     "temperatureHistory": "Temperature History",
@@ -53,5 +62,314 @@
     "menuReports": "REPORTS",
     "menuAllergyCheck": "ALLERGY CHECK",
     "menuSetup": "SETUP",
-    "menuLogout": "LOGOUT"
+    "menuLogout": "LOGOUT",
+    "temperatureUnit": "Temperature Unit",
+    "selectReportFrequency": "Select your report frequency",
+    "@selectReportFrequency": {
+        "description": "Title text for report frequency selection"
+    },
+    "chooseReportRange": "Please choose the report range below",
+    "@chooseReportRange": {
+        "description": "Subtitle text for report range selection"
+    },
+    "thisWeek": "This Week",
+    "@thisWeek": {
+        "description": "Option for selecting this week's report"
+    },
+    "thisMonth": "This Month",
+    "@thisMonth": {
+        "description": "Option for selecting this month's report"
+    },
+    "customRange": "Custom Range",
+    "@customRange": {
+        "description": "Option for selecting custom date range"
+    },
+    "selectedRange": "Selected Range: {start} - {end}",
+    "@selectedRange": {
+        "description": "Shows the selected date range",
+        "placeholders": {
+            "start": {
+                "type": "String",
+                "example": "Jan 01, 2024"
+            },
+            "end": {
+                "type": "String",
+                "example": "Jan 31, 2024"
+            }
+        }
+    },
+    "reportContents": "What the report will contain:",
+    "@reportContents": {
+        "description": "Title for report contents section"
+    },
+    "openingChecks": "Opening Checks",
+    "@openingChecks": {
+        "description": "Report item for opening checks"
+    },
+    "closingChecks": "Closing Checks",
+    "@closingChecks": {
+        "description": "Report item for closing checks"
+    },
+    "temperatureReadings": "Temperature Readings",
+    "@temperatureReadings": {
+        "description": "Report item for temperature readings"
+    },
+    "incidentsLogged": "Incidents Logged",
+    "@incidentsLogged": {
+        "description": "Report item for logged incidents"
+    },
+    "downloading": "Downloading...",
+    "@downloading": {
+        "description": "Text shown while report is downloading"
+    },
+    "downloadReport": "Download Report",
+    "@downloadReport": {
+        "description": "Button text for downloading report"
+    },
+    "selectDateFirst": "Please select a date range first",
+    "@selectDateFirst": {
+        "description": "Error message when trying to download without date selection"
+    },
+    "downloadSuccess": "Report downloaded successfully",
+    "@downloadSuccess": {
+        "description": "Success message after report download"
+    },
+    "downloadError": "Error downloading report: {error}",
+    "@downloadError": {
+        "description": "Error message when download fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "noTasksAvailable": "No tasks available",
+    "@noTasksAvailable": {
+        "description": "Message shown when no tasks are available"
+    },
+    "alertSettings": "Alert Settings",
+    "@alertSettings": {
+        "description": "Title for alert settings section"
+    },
+    "visualAlerts": "Visual Alerts",
+    "@visualAlerts": {
+        "description": "Title for visual alerts toggle"
+    },
+    "showPopupNotifications": "Show popup notifications",
+    "@showPopupNotifications": {
+        "description": "Description for visual alerts toggle"
+    },
+    "audioAlerts": "Audio Alerts",
+    "@audioAlerts": {
+        "description": "Title for audio alerts toggle"
+    },
+    "playSoundNotifications": "Play sound notifications",
+    "@playSoundNotifications": {
+        "description": "Description for audio alerts toggle"
+    },
+    "temperatures": "Temperatures",
+    "@temperatures": {
+        "description": "Title for temperature screen"
+    },
+    "selectSensorPrompt": "Select a sensor from the list above to view details.",
+    "@selectSensorPrompt": {
+        "description": "Message shown when no sensor is selected"
+    },
+    "noSensorData": "No sensor data available.",
+    "@noSensorData": {
+        "description": "Message shown when there is no sensor data"
+    },
+    "sensorId": "Sensor ID: {id}",
+    "@sensorId": {
+        "description": "Sensor ID label with value",
+        "placeholders": {
+            "id": {
+                "type": "String",
+                "example": "SENSOR001"
+            }
+        }
+    },
+    "temperatureValue": "Temperature: {value}°C",
+    "@temperatureValue": {
+        "description": "Temperature value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "25.5"
+            }
+        }
+    },
+    "batteryValue": "Battery: {value}%",
+    "@batteryValue": {
+        "description": "Battery value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "85"
+            }
+        }
+    },
+    "sensorList": "Sensor List",
+    "@sensorList": {
+        "description": "Title for sensor list section"
+    },
+    "currentState": "Current State",
+    "@currentState": {
+        "description": "Title for current state section"
+    },
+    "temperatureSetting": "Temperature Setting",
+    "@temperatureSetting": {
+        "description": "Title for temperature setting section"
+    },
+    "noTemperatureSettings": "No temperature settings available.",
+    "@noTemperatureSettings": {
+        "description": "Message shown when no temperature settings exist"
+    },
+    "minTemp": "Min: {value}°C",
+    "@minTemp": {
+        "description": "Minimum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemp": "Max: {value}°C",
+    "@maxTemp": {
+        "description": "Maximum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "alertEnabled": "Alert: Enabled",
+    "@alertEnabled": {
+        "description": "Text shown when alert is enabled"
+    },
+    "alertDisabled": "Alert: Disabled",
+    "@alertDisabled": {
+        "description": "Text shown when alert is disabled"
+    },
+    "delayMinutes": "Delay: {value} minutes",
+    "@delayMinutes": {
+        "description": "Delay in minutes label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5"
+            }
+        }
+    },
+    "minTemperature": "Min Temperature: {value}°C",
+    "@minTemperature": {
+        "description": "Minimum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemperature": "Max Temperature: {value}°C",
+    "@maxTemperature": {
+        "description": "Maximum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "temperatureAlert": "Temperature Alert:",
+    "@temperatureAlert": {
+        "description": "Temperature alert toggle label"
+    },
+    "delayBeforeAlert": "Delay Before Alert (minutes):",
+    "@delayBeforeAlert": {
+        "description": "Delay before alert label"
+    },
+    "enterDelayMinutes": "Enter delay in minutes",
+    "@enterDelayMinutes": {
+        "description": "Placeholder for delay input field"
+    },
+    "pleaseEnterDelay": "Please enter a delay value",
+    "@pleaseEnterDelay": {
+        "description": "Error message when delay is not entered"
+    },
+    "enterValidNumber": "Please enter a valid non-negative integer",
+    "@enterValidNumber": {
+        "description": "Error message when invalid delay is entered"
+    },
+    "customerAllergy": "CUSTOMER ALLERGY",
+    "@customerAllergy": {
+        "description": "Title for allergy check section"
+    },
+    "enterAllergens": "Enter allergens",
+    "@enterAllergens": {
+        "description": "Placeholder for allergens input"
+    },
+    "searching": "Searching...",
+    "@searching": {
+        "description": "Text shown while searching"
+    },
+    "pleaseEnterAllergens": "Please enter allergens to check",
+    "@pleaseEnterAllergens": {
+        "description": "Error message when no allergens entered"
+    },
+    "safeItems": "RESULTS NOT INCLUDING ALLERGY INGREDIENT",
+    "@safeItems": {
+        "description": "Title for safe items section"
+    },
+    "unsafeItems": "RESULTS INCLUDING ALLERGY INGREDIENT",
+    "@unsafeItems": {
+        "description": "Title for unsafe items section"
+    },
+    "teamMembersList": "TEAM MEMBERS LIST",
+    "@teamMembersList": {
+        "description": "Title for team members list"
+    },
+    "retry": "Retry",
+    "@retry": {
+        "description": "Button text for retry action"
+    },
+    "failedToLoadTeamMembers": "Failed to load team members: {error}",
+    "@failedToLoadTeamMembers": {
+        "description": "Error message when team members loading fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "404"
+            }
+        }
+    },
+    "errorFetchingTeamMembers": "Error fetching team members: {error}",
+    "@errorFetchingTeamMembers": {
+        "description": "Error message when fetching team members fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "name": "NAME",
+    "@name": {
+        "description": "Column header for name"
+    },
+    "userLevel": "USER LEVEL",
+    "@userLevel": {
+        "description": "Column header for user level"
+    },
+    "emailAddress": "EMAIL ADDRESS",
+    "@emailAddress": {
+        "description": "Column header for email address"
+    },
+    "trainingLevel": "TRAINING LEVEL",
+    "@trainingLevel": {
+        "description": "Column header for training level"
+    }
 }

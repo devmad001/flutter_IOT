@@ -5,13 +5,16 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:guardstar/config.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:guardstar/sidebar_layout.dart';
 import 'package:guardstar/home.dart';
+import 'package:guardstar/services/pdf_service.dart';
+import 'package:provider/provider.dart';
+import 'package:guardstar/providers/language_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+//import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 
 class ReportPage extends StatefulWidget {
   final String token;
@@ -58,10 +61,18 @@ class _ReportPageState extends State<ReportPage> {
     }
   }
 
+  Future<bool> checkAndRequestStoragePermission() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      status = await Permission.storage.request();
+    }
+    return status.isGranted;
+  }
+
   Future<void> _downloadReport() async {
     if (_rangeStart == null || _rangeEnd == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a date range first')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.selectDateFirst)),
       );
       return;
     }
@@ -71,16 +82,6 @@ class _ReportPageState extends State<ReportPage> {
     });
 
     try {
-      // Request storage permission
-      var status = await Permission.storage.status;
-      if (!status.isGranted) {
-        status = await Permission.storage.request();
-      }
-
-      if (!status.isGranted) {
-        throw Exception('Storage permission is required to save the report');
-      }
-
       final url = Uri.parse('${Config.baseUrl}/user/report/pdf').replace(
         queryParameters: {
           'startDate': _rangeStart!.toIso8601String(),
@@ -97,71 +98,43 @@ class _ReportPageState extends State<ReportPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        // Create PDF document
-        final pdf = pw.Document();
+        // Get current language code from provider
+        final languageProvider =
+            Provider.of<LanguageProvider>(context, listen: false);
+        final currentLanguageCode = languageProvider.currentLocale.languageCode;
 
-        // Add content to PDF
-        pdf.addPage(
-          pw.MultiPage(
-            build: (context) => [
-              pw.Header(
-                level: 0,
-                child: pw.Text(
-                  'Report for ${DateFormat('MMM dd, yyyy').format(_rangeStart!)} - ${DateFormat('MMM dd, yyyy').format(_rangeEnd!)}',
-                  style: pw.TextStyle(
-                      fontSize: 20, fontWeight: pw.FontWeight.bold),
-                ),
-              ),
-              pw.SizedBox(height: 20),
-              pw.Text('Opening Checks',
-                  style: pw.TextStyle(
-                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
-              pw.Text(data['openingChecks']?.toString() ?? 'No data available'),
-              pw.SizedBox(height: 10),
-              pw.Text('Closing Checks',
-                  style: pw.TextStyle(
-                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
-              pw.Text(data['closingChecks']?.toString() ?? 'No data available'),
-              pw.SizedBox(height: 10),
-              pw.Text('Temperature Readings',
-                  style: pw.TextStyle(
-                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
-              pw.Text(data['temperatureReadings']?.toString() ??
-                  'No data available'),
-              pw.SizedBox(height: 10),
-              pw.Text('Incidents Logged',
-                  style: pw.TextStyle(
-                      fontSize: 16, fontWeight: pw.FontWeight.bold)),
-              pw.Text(data['incidents']?.toString() ?? 'No data available'),
-            ],
-          ),
+        // Generate PDF using the service
+        final pdf = await PdfService.generateReport(
+          startDate: _rangeStart!,
+          endDate: _rangeEnd!,
+          data: data['reportData'],
+          languageCode: currentLanguageCode,
         );
 
-        // Save PDF to file
-        final output = await getExternalStorageDirectory();
-        if (output == null) {
-          throw Exception('Could not access external storage');
-        }
-
+        // Save PDF to a temporary file
+        final output = await getTemporaryDirectory();
         final fileName = 'report_${DateTime.now().millisecondsSinceEpoch}.pdf';
         final file = File('${output.path}/$fileName');
         await file.writeAsBytes(await pdf.save());
 
-        // Open the PDF file
-        final result = await OpenFile.open(file.path);
-        if (result.type != ResultType.done) {
-          throw Exception('Could not open the PDF file');
-        }
+        // final params = SaveFileDialogParams(
+        //   sourceFilePath: file.path,
+        //   fileName: fileName,
+        // );
+        // await FlutterFileDialog.saveFile(params: params);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report downloaded successfully')),
+          SnackBar(
+              content: Text(AppLocalizations.of(context)!.downloadSuccess)),
         );
       } else {
         throw Exception('Failed to download report: ${response.statusCode}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error downloading report: $e')),
+        SnackBar(
+            content: Text(
+                AppLocalizations.of(context)!.downloadError(e.toString()))),
       );
     } finally {
       setState(() {
@@ -172,24 +145,33 @@ class _ReportPageState extends State<ReportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Select your report frequency',
-              style: TextStyle(
+            const SizedBox(height: 60),
+            Text(
+              l10n.menuReports,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.selectReportFrequency,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Please choose the report range below',
-              style: TextStyle(
+            Text(
+              l10n.chooseReportRange,
+              style: const TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
               ),
@@ -197,10 +179,12 @@ class _ReportPageState extends State<ReportPage> {
             const SizedBox(height: 16),
             DropdownButton<String>(
               value: _selectedPeriod,
-              items: const [
-                DropdownMenuItem(value: 'thisWeek', child: Text('This Week')),
-                DropdownMenuItem(value: 'thisMonth', child: Text('This Month')),
-                DropdownMenuItem(value: 'custom', child: Text('Custom Range')),
+              items: [
+                DropdownMenuItem(value: 'thisWeek', child: Text(l10n.thisWeek)),
+                DropdownMenuItem(
+                    value: 'thisMonth', child: Text(l10n.thisMonth)),
+                DropdownMenuItem(
+                    value: 'custom', child: Text(l10n.customRange)),
               ],
               onChanged: (String? newValue) {
                 if (newValue != null) {
@@ -246,13 +230,15 @@ class _ReportPageState extends State<ReportPage> {
             ],
             if (_rangeStart != null && _rangeEnd != null) ...[
               Text(
-                'Selected Range: ${DateFormat('MMM dd, yyyy').format(_rangeStart!)} - ${DateFormat('MMM dd, yyyy').format(_rangeEnd!)}',
+                l10n.selectedRange(
+                    DateFormat('MMM dd, yyyy').format(_rangeStart!),
+                    DateFormat('MMM dd, yyyy').format(_rangeEnd!)),
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'What the report will contain:',
-                style: TextStyle(
+              Text(
+                l10n.reportContents,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -267,14 +253,16 @@ class _ReportPageState extends State<ReportPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildReportItem(Icons.check_box, 'Opening Checks'),
+                    _buildReportItem(Icons.check_box, l10n.openingChecks),
                     const SizedBox(height: 8),
                     _buildReportItem(
-                        Icons.check_box_outlined, 'Closing Checks'),
+                        Icons.check_box_outlined, l10n.closingChecks),
                     const SizedBox(height: 8),
-                    _buildReportItem(Icons.thermostat, 'Temperature Readings'),
+                    _buildReportItem(
+                        Icons.thermostat, l10n.temperatureReadings),
                     const SizedBox(height: 8),
-                    _buildReportItem(Icons.report_problem, 'Incidents Logged'),
+                    _buildReportItem(
+                        Icons.report_problem, l10n.incidentsLogged),
                   ],
                 ),
               ),
@@ -290,8 +278,8 @@ class _ReportPageState extends State<ReportPage> {
                         ),
                       )
                     : const Icon(Icons.download),
-                label:
-                    Text(_isDownloading ? 'Downloading...' : 'Download Report'),
+                label: Text(
+                    _isDownloading ? l10n.downloading : l10n.downloadReport),
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

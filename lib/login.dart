@@ -5,6 +5,10 @@ import 'package:guardstar/config.dart';
 import 'package:guardstar/home.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:guardstar/sidebar_layout.dart';
+import 'package:provider/provider.dart';
+import 'package:guardstar/providers/socket_provider.dart';
+import 'package:guardstar/providers/sensor_data_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -29,10 +33,23 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _checkLoggedIn() async {
     final token = await _secureStorage.read(key: 'token');
     if (token != null) {
-      // Token found, navigate directly to HomeScreen.
+      // Initialize socket connection
+      final socketProvider =
+          Provider.of<SocketProvider>(context, listen: false);
+      final sensorDataProvider =
+          Provider.of<SensorDataProvider>(context, listen: false);
+      socketProvider.initSocket(token, sensorDataProvider: sensorDataProvider);
+
+      // Token found, navigate directly to HomeScreen
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
+        MaterialPageRoute(
+          builder: (context) => SidebarLayout(
+            token: token,
+            content: HomeScreen(token: token),
+            title: 'HOME',
+          ),
+        ),
       );
     }
   }
@@ -61,12 +78,27 @@ class _LoginScreenState extends State<LoginScreen> {
         _showMessage("Login Successful");
         final token = responseData['token'];
 
-        // Save token securely
+        // Initialize socket connection
+        final socketProvider =
+            Provider.of<SocketProvider>(context, listen: false);
+        final sensorDataProvider =
+            Provider.of<SensorDataProvider>(context, listen: false);
+        socketProvider.initSocket(token,
+            sensorDataProvider: sensorDataProvider);
+
+        // Store token securely
         await _secureStorage.write(key: 'token', value: token);
 
+        // Navigate to home screen
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen(token: token)),
+          MaterialPageRoute(
+            builder: (context) => SidebarLayout(
+              token: token,
+              content: HomeScreen(token: token),
+              title: 'HOME',
+            ),
+          ),
         );
       } else {
         final errorData = jsonDecode(response.body);
@@ -90,8 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          const Color.fromARGB(255, 50, 35, 118), // Updated background color
+      backgroundColor: const Color(0xFF2F2E70), // Updated background color
       body: SingleChildScrollView(
         child: SizedBox(
           height: MediaQuery.of(context).size.height,

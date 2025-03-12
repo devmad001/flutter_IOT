@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:intl/intl.dart'; // For formatting date & time
 import 'create_incident.dart'; // Import the form page
 import 'package:guardstar/config.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:guardstar/sidebar_layout.dart';
 
 class IncidentPage extends StatefulWidget {
   final String token;
@@ -16,7 +18,7 @@ class IncidentPage extends StatefulWidget {
 
 class _IncidentPageState extends State<IncidentPage> {
   List<dynamic> incidents = [];
-  bool isLoading = true;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -25,32 +27,79 @@ class _IncidentPageState extends State<IncidentPage> {
   }
 
   Future<void> fetchIncidents() async {
+    setState(() {
+      isLoading = true;
+    });
+
     final url = '${Config.baseUrl}/user/incidents';
+    print('Fetching incidents from: $url');
+    print(
+        'Using token: ${widget.token.substring(0, 10)}...'); // Only print first 10 chars for security
+
     try {
       final response = await http.get(
         Uri.parse(url),
         headers: {'Authorization': 'Bearer ${widget.token}'},
       );
 
+      print('Response status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+      print('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
+        if (data == null) {
+          print('Received null data from API');
+          setState(() {
+            incidents = [];
+            isLoading = false;
+          });
+          return;
+        }
+
+        List<dynamic> incidentsList;
+
+        // Handle both array and object response formats
+
+        incidentsList = data;
+
         // Sort incidents so that the newest ones are on top
-        data['incidents'].sort((a, b) {
+        incidentsList.sort((a, b) {
+          // Handle null reportedAt values
+          if (a['reportedAt'] == null) return 1; // Move null dates to the end
+          if (b['reportedAt'] == null) return -1; // Move null dates to the end
+
           DateTime dateA = DateTime.parse(a['reportedAt']);
           DateTime dateB = DateTime.parse(b['reportedAt']);
           return dateB.compareTo(dateA); // Newest first
         });
 
         setState(() {
-          incidents = data['incidents'];
+          incidents = incidentsList;
           isLoading = false;
         });
       } else {
         print('Failed to load incidents: ${response.body}');
+        setState(() {
+          incidents = [];
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text('Failed to load incidents: ${response.statusCode}')),
+        );
       }
     } catch (e) {
       print('Error fetching incidents: $e');
+      setState(() {
+        incidents = [];
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading incidents: $e')),
+      );
     }
   }
 
@@ -61,7 +110,9 @@ class _IncidentPageState extends State<IncidentPage> {
 
       final url = '${Config.baseUrl}/user/incidents/$incidentId';
       final body = jsonEncode({'status': 'Resolved', 'resolution': resolution});
-
+      setState(() {
+        isLoading = true;
+      });
       try {
         final response = await http.patch(
           Uri.parse(url),
@@ -73,6 +124,9 @@ class _IncidentPageState extends State<IncidentPage> {
         );
 
         if (response.statusCode == 200) {
+          setState(() {
+            isLoading = false;
+          });
           fetchIncidents();
         } else {
           print('Failed to update incident: ${response.body}');
@@ -165,7 +219,11 @@ class _IncidentPageState extends State<IncidentPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CreateIncidentPage(token: widget.token),
+        builder: (context) => SidebarLayout(
+            token: widget.token,
+            content: CreateIncidentPage(token: widget.token),
+            title:""
+          ), 
       ),
     ).then((_) => fetchIncidents());
   }
@@ -176,40 +234,77 @@ class _IncidentPageState extends State<IncidentPage> {
         .format(dateTime); // Format date & time
   }
 
+  String _getMappedLanguageCode(String languageCode) {
+    // Map language codes
+    switch (languageCode) {
+      case 'zh':
+        return 'ch';
+      case 'en':
+        return 'en';
+      case 'pl':
+        return 'po';
+      case 'it':
+        return 'it';
+      case 'tr':
+        return 'tu';
+      default:
+        return languageCode;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Incidents')),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 60.0, left: 16.0, right: 16.0, bottom: 16.0),
+                  child: Text(
+                    l10n.incidents,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 ElevatedButton(
                   onPressed: _navigateToCreateIncident,
-                  child: const Text('Create Incident'),
+                  child: Text(l10n.createIncident),
                 ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: incidents.length,
                     itemBuilder: (context, index) {
                       final incident = incidents[index];
-                      String formattedDate =
-                          formatDateTime(incident['reportedAt']);
+                      String formattedDate = incident['reportedAt'] != null
+                          ? formatDateTime(incident['reportedAt'])
+                          : 'No date reported';
                       bool isResolved = incident['status'] == 'Resolved';
+
+                      // Get the localized incident text based on current language
+                      String mappedLanguageCode = _getMappedLanguageCode(
+                          Localizations.localeOf(context).languageCode);
+                      String incidentText =
+                          incident['incident_$mappedLanguageCode'] ??
+                              incident['incident_en'];
+                      String resolutionText =
+                          incident['resolution_$mappedLanguageCode'] ??
+                              incident['resolution_en'];
 
                       return Card(
                         margin: const EdgeInsets.all(8),
-                        color: isResolved
-                            ? Colors.green[100]
-                            : Colors.red[
-                                100], // Green for resolved, Red for unresolved
+                        color: isResolved ? Colors.green[100] : Colors.red[100],
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                incident['incident'],
+                                incidentText,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: isResolved
@@ -219,10 +314,10 @@ class _IncidentPageState extends State<IncidentPage> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text("Employee: ${incident['employeeName']}"),
+                              Text("${l10n.team}: ${incident['employeeName']}"),
                               if (isResolved)
                                 Text(
-                                  "Resolution: ${incident['resolution'] ?? 'N/A'}",
+                                  "${l10n.info}: $resolutionText",
                                   style: const TextStyle(
                                       fontStyle: FontStyle.italic),
                                 ),
@@ -246,12 +341,6 @@ class _IncidentPageState extends State<IncidentPage> {
                                                 incident['_id'], value);
                                           }
                                         },
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.red),
-                                        onPressed: () =>
-                                            deleteIncident(incident['_id']),
                                       ),
                                     ],
                                   ),

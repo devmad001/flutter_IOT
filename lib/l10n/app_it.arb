@@ -1,0 +1,237 @@
+{
+    "appTitle": "Alpha",
+    "home": "Home",
+    "reports": "Rapporti",
+    "setup": "Configurazione",
+    "team": "Team",
+    "temperature": "Temperatura",
+    "incidents": "Incidenti",
+    "logout": "Esci",
+    "login": "Accedi",
+    "username": "Nome utente",
+    "password": "Password",
+    "submit": "Invia",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "create": "Crea",
+    "search": "Cerca",
+    "noData": "Nessun dato disponibile",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "warning": "Avviso",
+    "info": "Informazione",
+    "notifications": "Notifiche",
+    "notificationsSubtitle": "Configura le impostazioni delle notifiche",
+    "language": "Lingua",
+    "security": "Sicurezza",
+    "securitySubtitle": "Gestisci le impostazioni di sicurezza",
+    "backup": "Backup e Ripristino",
+    "backupSubtitle": "Gestisci il backup e il ripristino dei dati",
+    "viewChecklist": "VISUALIZZA CHECKLIST",
+    "clickToFill": "CLICCA PER COMPILARE",
+    "addIncident": "AGGIUNGI INCIDENTE",
+    "createIncident": "CREA INCIDENTE",
+    "openingChecklist": "Checklist di Apertura",
+    "closingChecklist": "Checklist di Chiusura",
+    "unknownRestaurant": "Ristorante Sconosciuto",
+    "battery": "Batteria",
+    "lastUpdated": "Ultimo aggiornamento: {datetime}",
+    "@lastUpdated": {
+        "description": "Last updated label with datetime",
+        "placeholders": {
+            "datetime": {
+                "type": "String",
+                "example": "2024-01-01 12:00:00"
+            }
+        }
+    },
+    "selectDateRange": "Seleziona Intervallo Date",
+    "noTemperatureData": "Nessun dato di temperatura disponibile per l'intervallo selezionato",
+    "temperatureHistory": "Storico Temperature",
+    "temperatureChart": "Grafico Temperature",
+    "temperatureTable": "Tabella Temperature",
+    "menuHome": "HOME",
+    "menuOpeningChecks": "CONTROLLI APERTURA",
+    "menuClosingChecks": "CONTROLLI CHIUSURA",
+    "menuTemperatures": "TEMPERATURE",
+    "menuTeam": "TEAM",
+    "menuIncidents": "INCIDENTI",
+    "menuReports": "RAPPORTI",
+    "menuAllergyCheck": "CONTROLLO ALLERGIE",
+    "menuSetup": "CONFIGURAZIONE",
+    "menuLogout": "ESCI",
+    "temperatureUnit": "Unità di Temperatura",
+    "selectReportFrequency": "Seleziona la frequenza dei rapporti",
+    "chooseReportRange": "Seleziona l'intervallo del rapporto qui sotto",
+    "thisWeek": "Questa Settimana",
+    "thisMonth": "Questo Mese",
+    "customRange": "Intervallo Personalizzato",
+    "selectedRange": "Intervallo Selezionato: {start} - {end}",
+    "@selectedRange": {
+        "description": "Shows the selected date range",
+        "placeholders": {
+            "start": {
+                "type": "String",
+                "example": "Jan 01, 2024"
+            },
+            "end": {
+                "type": "String",
+                "example": "Jan 31, 2024"
+            }
+        }
+    },
+    "reportContents": "Contenuto del rapporto:",
+    "openingChecks": "Controlli di Apertura",
+    "closingChecks": "Controlli di Chiusura",
+    "temperatureReadings": "Letture Temperatura",
+    "incidentsLogged": "Incidenti Registrati",
+    "downloading": "Download in corso...",
+    "downloadReport": "Scarica Rapporto",
+    "selectDateFirst": "Seleziona prima un intervallo di date",
+    "downloadSuccess": "Rapporto scaricato con successo",
+    "downloadError": "Errore durante il download del rapporto: {error}",
+    "@downloadError": {
+        "description": "Error message when download fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "noTasksAvailable": "Nessuna attività disponibile",
+    "alertSettings": "Impostazioni Avvisi",
+    "visualAlerts": "Avvisi Visivi",
+    "showPopupNotifications": "Mostra notifiche popup",
+    "audioAlerts": "Avvisi Audio",
+    "playSoundNotifications": "Riproduci notifiche sonore",
+    "temperatures": "Temperature",
+    "selectSensorPrompt": "Seleziona un sensore dalla lista sopra per vedere i dettagli",
+    "noSensorData": "Nessun dato del sensore disponibile",
+    "sensorId": "ID Sensore: {id}",
+    "@sensorId": {
+        "description": "Sensor ID label with value",
+        "placeholders": {
+            "id": {
+                "type": "String",
+                "example": "SENSOR001"
+            }
+        }
+    },
+    "temperatureValue": "Temperatura: {value}°C",
+    "@temperatureValue": {
+        "description": "Temperature value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "25.5"
+            }
+        }
+    },
+    "batteryValue": "Batteria: {value}%",
+    "@batteryValue": {
+        "description": "Battery value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "85"
+            }
+        }
+    },
+    "sensorList": "Lista Sensori",
+    "currentState": "Stato Attuale",
+    "temperatureSetting": "Impostazione Temperatura",
+    "noTemperatureSettings": "Nessuna impostazione temperatura disponibile",
+    "minTemp": "Min: {value}°C",
+    "@minTemp": {
+        "description": "Minimum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemp": "Max: {value}°C",
+    "@maxTemp": {
+        "description": "Maximum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "alertEnabled": "Avviso: Attivato",
+    "alertDisabled": "Avviso: Disattivato",
+    "delayMinutes": "Ritardo: {value} minuti",
+    "@delayMinutes": {
+        "description": "Delay in minutes label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5"
+            }
+        }
+    },
+    "minTemperature": "Temperatura Min: {value}°C",
+    "@minTemperature": {
+        "description": "Minimum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemperature": "Temperatura Max: {value}°C",
+    "@maxTemperature": {
+        "description": "Maximum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "temperatureAlert": "Avviso Temperatura:",
+    "delayBeforeAlert": "Ritardo Prima dell'Avviso (minuti):",
+    "enterDelayMinutes": "Inserisci ritardo in minuti",
+    "pleaseEnterDelay": "Inserisci un valore di ritardo",
+    "enterValidNumber": "Inserisci un numero intero non negativo valido",
+    "customerAllergy": "ALLERGIE CLIENTE",
+    "enterAllergens": "Inserisci allergeni",
+    "searching": "Ricerca in corso...",
+    "pleaseEnterAllergens": "Inserisci gli allergeni da controllare",
+    "safeItems": "RISULTATI SENZA INGREDIENTI ALLERGENI",
+    "unsafeItems": "RISULTATI CON INGREDIENTI ALLERGENI",
+    "teamMembersList": "LISTA MEMBRI DEL TEAM",
+    "retry": "Riprova",
+    "failedToLoadTeamMembers": "Caricamento membri del team fallito: {error}",
+    "@failedToLoadTeamMembers": {
+        "description": "Error message when team members loading fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "404"
+            }
+        }
+    },
+    "errorFetchingTeamMembers": "Errore nel recupero dei membri del team: {error}",
+    "@errorFetchingTeamMembers": {
+        "description": "Error message when fetching team members fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "name": "NOME",
+    "userLevel": "LIVELLO UTENTE",
+    "emailAddress": "INDIRIZZO EMAIL",
+    "trainingLevel": "LIVELLO DI FORMAZIONE"
+} 

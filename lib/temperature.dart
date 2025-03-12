@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'config.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TemperatureScreen extends StatefulWidget {
   final String token;
@@ -57,7 +58,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
       );
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        final sensorRecords = jsonResponse['data'][0];
+        final sensorRecords = jsonResponse['data'];
 
         setState(() {
           latestSensorData = sensorRecords;
@@ -150,18 +151,20 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     // Sensor Readings Section
     Widget sensorContent;
     if (selectedSensorId == null) {
-      sensorContent = const Center(
-        child: Text('Select a sensor from the list above to view details.'),
+      sensorContent = Center(
+        child: Text(l10n.selectSensorPrompt),
       );
     } else if (sensorLoading) {
       sensorContent = const Center(child: CircularProgressIndicator());
     } else if (sensorError != null) {
       sensorContent = Center(child: Text(sensorError!));
     } else if (latestSensorData.isEmpty) {
-      sensorContent = const Center(child: Text('No sensor data available.'));
+      sensorContent = Center(child: Text(l10n.noSensorData));
     } else {
       sensorContent = Card(
         margin: const EdgeInsets.all(10),
@@ -171,23 +174,24 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Sensor ID: ${selectedSensorId}",
+                l10n.sensorId(selectedSensorId!),
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                "Temperature: ${latestSensorData['temperature']}°C",
+                l10n.temperatureValue(
+                    latestSensorData['temperature'].toString()),
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8),
               Text(
-                "Battery: ${latestSensorData['battery']}%",
+                l10n.batteryValue(latestSensorData['battery'].toString()),
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8),
               Text(
-                "Last updated: ${formatDateTime(latestSensorData['createdAt'])}",
+                l10n.lastUpdated(formatDateTime(latestSensorData['createdAt'])),
                 style: const TextStyle(fontSize: 16),
               ),
             ],
@@ -201,8 +205,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
     if (settingsLoading) {
       settingsListContent = const Center(child: CircularProgressIndicator());
     } else if (temperatureSettings.isEmpty) {
-      settingsListContent = const Center(
-        child: Text('No temperature settings available.'),
+      settingsListContent = Center(
+        child: Text(l10n.noTemperatureSettings),
       );
     } else {
       settingsListContent = ListView.builder(
@@ -231,16 +235,16 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Min: ${setting['min_temp']}°C, Max: ${setting['max_temp']}°C",
+                    "${l10n.minTemp(setting['min_temp'].toString())}, ${l10n.maxTemp(setting['max_temp'].toString())}",
                   ),
                   Text(
-                    "Alert: ${setting['alert'] ? 'Enabled' : 'Disabled'}",
+                    setting['alert'] ? l10n.alertEnabled : l10n.alertDisabled,
                     style: TextStyle(
                       color: setting['alert'] ? Colors.red : Colors.grey,
                     ),
                   ),
                   Text(
-                    "Delay: ${setting['delay_before_alert']} minutes",
+                    l10n.delayMinutes(setting['delay_before_alert'].toString()),
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -279,7 +283,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                 child: Text(settingsError!,
                     style: const TextStyle(color: Colors.red)),
               ),
-            Text("Min Temperature: ${minTempSetting.toStringAsFixed(1)}°C",
+            Text(l10n.minTemperature(minTempSetting.toStringAsFixed(1)),
                 style: const TextStyle(fontSize: 16)),
             Slider(
               value: minTempSetting,
@@ -297,7 +301,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               },
             ),
             const SizedBox(height: 16),
-            Text("Max Temperature: ${maxTempSetting.toStringAsFixed(1)}°C",
+            Text(l10n.maxTemperature(maxTempSetting.toStringAsFixed(1)),
                 style: const TextStyle(fontSize: 16)),
             Slider(
               value: maxTempSetting,
@@ -317,8 +321,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Text("Temperature Alert: ",
-                    style: TextStyle(fontSize: 16)),
+                Text(l10n.temperatureAlert,
+                    style: const TextStyle(fontSize: 16)),
                 Switch(
                   value: alertEnabled,
                   onChanged: (value) {
@@ -330,21 +334,20 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Text("Delay Before Alert (minutes):",
-                style: const TextStyle(fontSize: 16)),
+            Text(l10n.delayBeforeAlert, style: const TextStyle(fontSize: 16)),
             TextFormField(
               controller: _delayController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                hintText: "Enter delay in minutes",
+              decoration: InputDecoration(
+                hintText: l10n.enterDelayMinutes,
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "Please enter a delay value";
+                  return l10n.pleaseEnterDelay;
                 }
                 final parsed = int.tryParse(value);
                 if (parsed == null || parsed < 0) {
-                  return "Please enter a valid non-negative integer";
+                  return l10n.enterValidNumber;
                 }
                 return null;
               },
@@ -356,9 +359,6 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Temperatures"),
-      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await fetchSensorData();
@@ -370,21 +370,30 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Sensor Readings Section
-              const Text("Sensor List",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 60),
+              Text(
+                l10n.temperatures,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(l10n.sensorList,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               settingsListContent,
               const Divider(height: 32, thickness: 2),
-              // Temperature Settings List Section
-              const Text("Current State",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(l10n.currentState,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               sensorContent,
               const Divider(height: 32, thickness: 2),
-              // Temperature Settings Form Section
-              const Text("Temperature Setting",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(l10n.temperatureSetting,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               settingsFormContent,
             ],

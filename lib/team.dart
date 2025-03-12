@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:guardstar/config.dart';
 import 'package:guardstar/sidebar_layout.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TeamScreen extends StatefulWidget {
   final String token;
@@ -49,15 +50,17 @@ class _TeamScreenState extends State<TeamScreen> {
           _isLoading = false;
         });
       } else {
+        final l10n = AppLocalizations.of(context)!;
         setState(() {
-          _error = 'Failed to load team members: ${response.statusCode}';
+          _error = l10n.failedToLoadTeamMembers(response.statusCode.toString());
           _isLoading = false;
         });
         print('Failed to load team members: ${response.body}');
       }
     } catch (e) {
+      final l10n = AppLocalizations.of(context)!;
       setState(() {
-        _error = 'Error fetching team members: $e';
+        _error = l10n.errorFetchingTeamMembers(e.toString());
         _isLoading = false;
       });
       print('Error fetching team members: $e');
@@ -66,17 +69,20 @@ class _TeamScreenState extends State<TeamScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: Card(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(
+            top: 46.0, left: 16.0, right: 16.0, bottom: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Text(
-                'TEAM MEMBERS LIST',
-                style: TextStyle(
+                l10n.teamMembersList,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -98,17 +104,32 @@ class _TeamScreenState extends State<TeamScreen> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 onPressed: _fetchTeamMembers,
-                                child: const Text('Retry'),
+                                child: Text(l10n.retry),
                               ),
                             ],
                           ),
                         )
                       : DataTable2(
-                          columns: const [
-                            DataColumn2(label: Text('NAME')),
-                            DataColumn2(label: Text('USER LEVEL')),
-                            DataColumn2(label: Text('EMAIL ADDRESS')),
-                            DataColumn2(label: Text('TRAINING LEVEL')),
+                          columnSpacing: 12,
+                          horizontalMargin: 12,
+                          minWidth: 600,
+                          columns: [
+                            DataColumn2(
+                              label: Text(l10n.name),
+                              size: ColumnSize.S,
+                            ),
+                            DataColumn2(
+                              label: Text(l10n.userLevel),
+                              size: ColumnSize.S,
+                            ),
+                            DataColumn2(
+                              label: Text(l10n.emailAddress),
+                              size: ColumnSize.L,
+                            ),
+                            DataColumn2(
+                              label: Text(l10n.trainingLevel),
+                              size: ColumnSize.S,
+                            ),
                           ],
                           rows: _teamMembers.map((member) {
                             return DataRow2(

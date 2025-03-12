@@ -30,6 +30,7 @@ class SidebarLayout extends StatefulWidget {
 
 class _SidebarLayoutState extends State<SidebarLayout> {
   String selectedMenu = '';
+  late Widget currentContent;
 
   List<Map<String, dynamic>> _getMenuItems(AppLocalizations l10n) {
     return [
@@ -45,38 +46,20 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     ];
   }
 
-  void _navigateTo(String label, Widget page, {bool isHome = false}) {
+  void _updateContent(String label, Widget page) {
     if (selectedMenu == label) return;
 
     setState(() {
       selectedMenu = label;
+      currentContent = page;
     });
-
-    if (isHome) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(token: widget.token),
-        ),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SidebarLayout(
-            token: widget.token,
-            content: page,
-            title: label,
-          ),
-        ),
-      );
-    }
   }
 
   @override
   void initState() {
     super.initState();
     selectedMenu = widget.title;
+    currentContent = widget.content;
   }
 
   @override
@@ -85,92 +68,131 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     final menuItems = _getMenuItems(l10n);
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(
-              child: Column(
-                children: [
-                  Image.asset(
-                    'assets/logo.jpeg',
-                    height: 80,
+      body: Row(
+        children: [
+          // Fixed Sidebar
+          Container(
+            width: 230,
+            color: const Color(0xFF2F2E70),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 140,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Image.asset('assets/logo.jpeg',
+                          height: 100, width: 200),
+                    ),
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: ListView(
+                    children: menuItems.map((item) {
+                      return ListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 24),
+                        title: Center(
+                          child: selectedMenu != item['label']
+                              ? Text(
+                                  item['label'],
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                )
+                              : Text(
+                                  item['label'],
+                                  style: TextStyle(
+                                    color: Colors.yellow,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                        ),
+                        selected: selectedMenu == item['label'],
+                        selectedColor: Colors.yellow,
+                        selectedTileColor: Colors.yellow,
+                        onTap: () {
+                          if (item['label'] == l10n.menuHome) {
+                            _updateContent(
+                                l10n.menuHome, HomeScreen(token: widget.token));
+                          } else if (item['label'] == l10n.menuOpeningChecks) {
+                            _updateContent(l10n.menuOpeningChecks,
+                                OpeningChecklistPage(token: widget.token));
+                          } else if (item['label'] == l10n.menuClosingChecks) {
+                            _updateContent(l10n.menuClosingChecks,
+                                ClosingChecklistPage(token: widget.token));
+                          } else if (item['label'] == l10n.menuTemperatures) {
+                            _updateContent(
+                              l10n.menuTemperatures,
+                              TemperatureScreen(token: widget.token),
+                            );
+                          } else if (item['label'] == l10n.menuTeam) {
+                            _updateContent(
+                              l10n.menuTeam,
+                              TeamScreen(token: widget.token),
+                            );
+                          } else if (item['label'] == l10n.menuIncidents) {
+                            _updateContent(l10n.menuIncidents,
+                                IncidentPage(token: widget.token));
+                          } else if (item['label'] == l10n.menuReports) {
+                            _updateContent(
+                              l10n.menuReports,
+                              ReportPage(token: widget.token),
+                            );
+                          } else if (item['label'] == l10n.menuAllergyCheck) {
+                            _updateContent(
+                              l10n.menuAllergyCheck,
+                              AllergyCheckPage(token: widget.token),
+                            );
+                          } else if (item['label'] == l10n.menuSetup) {
+                            _updateContent(
+                              l10n.menuSetup,
+                              SetupPage(token: widget.token),
+                            );
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const Divider(color: Colors.white24),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                  title: Center(
+                    child: Text(
+                      l10n.menuLogout,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LogoutScreen()),
+                    );
+                  },
+                ),
+              ],
             ),
-            Expanded(
-              child: ListView(
-                children: menuItems.map((item) {
-                  return ListTile(
-                    leading: Icon(item['icon'], color: Colors.blue[900]),
-                    title: Text(item['label']),
-                    selected: selectedMenu == item['label'],
-                    selectedTileColor: Colors.blue[100],
-                    onTap: () {
-                      // Close the drawer before navigating.
-                      Navigator.pop(context);
-
-                      if (item['label'] == l10n.menuHome) {
-                        _navigateTo(l10n.menuHome, const SizedBox(),
-                            isHome: true);
-                      } else if (item['label'] == l10n.menuOpeningChecks) {
-                        _navigateTo(l10n.menuOpeningChecks,
-                            OpeningChecklistPage(token: widget.token));
-                      } else if (item['label'] == l10n.menuClosingChecks) {
-                        _navigateTo(l10n.menuClosingChecks,
-                            ClosingChecklistPage(token: widget.token));
-                      } else if (item['label'] == l10n.menuTemperatures) {
-                        _navigateTo(
-                          l10n.menuTemperatures,
-                          TemperatureScreen(token: widget.token),
-                        );
-                      } else if (item['label'] == l10n.menuTeam) {
-                        _navigateTo(
-                          l10n.menuTeam,
-                          TeamScreen(token: widget.token),
-                        );
-                      } else if (item['label'] == l10n.menuIncidents) {
-                        _navigateTo(l10n.menuIncidents,
-                            CreateIncidentPage(token: widget.token));
-                      } else if (item['label'] == l10n.menuReports) {
-                        _navigateTo(
-                          l10n.menuReports,
-                          ReportPage(token: widget.token),
-                        );
-                      } else if (item['label'] == l10n.menuAllergyCheck) {
-                        _navigateTo(
-                          l10n.menuAllergyCheck,
-                          AllergyCheckPage(token: widget.token),
-                        );
-                      } else if (item['label'] == l10n.menuSetup) {
-                        _navigateTo(
-                          l10n.menuSetup,
-                          SetupPage(token: widget.token),
-                        );
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-            ),
-            const Divider(),
-            ListTile(
-                leading: Icon(Icons.logout, color: Colors.red[700]),
-                title: Text(l10n.menuLogout,
-                    style: TextStyle(color: Colors.red[700])),
-                onTap: () {
-                  Navigator.pop(context); // close the drawer
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LogoutScreen()),
-                  );
-                }),
-          ],
-        ),
+          ),
+          // Vertical Divider
+          const VerticalDivider(
+            width: 1,
+            thickness: 1,
+          ),
+          // Content
+          Expanded(
+            child: currentContent,
+          ),
+        ],
       ),
-      body: widget.content,
     );
   }
 }

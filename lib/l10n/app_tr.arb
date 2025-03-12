@@ -1,0 +1,237 @@
+{
+    "appTitle": "Alpha",
+    "home": "Ana Sayfa",
+    "reports": "Raporlar",
+    "setup": "Ayarlar",
+    "team": "Ekip",
+    "temperature": "Sıcaklık",
+    "incidents": "Olaylar",
+    "logout": "Çıkış",
+    "login": "Giriş",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "submit": "Gönder",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "search": "Ara",
+    "noData": "Veri yok",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "warning": "Uyarı",
+    "info": "Bilgi",
+    "notifications": "Bildirimler",
+    "notificationsSubtitle": "Bildirim ayarlarını yapılandır",
+    "language": "Dil",
+    "security": "Güvenlik",
+    "securitySubtitle": "Güvenlik ayarlarını yönet",
+    "backup": "Yedekleme ve Geri Yükleme",
+    "backupSubtitle": "Veri yedekleme ve geri yüklemeyi yönet",
+    "viewChecklist": "KONTROL LİSTESİNİ GÖRÜNTÜLE",
+    "clickToFill": "DOLDURMAK İÇİN TIKLA",
+    "addIncident": "OLAY EKLE",
+    "createIncident": "OLAY OLUŞTUR",
+    "openingChecklist": "Açılış Kontrol Listesi",
+    "closingChecklist": "Kapanış Kontrol Listesi",
+    "unknownRestaurant": "Bilinmeyen Restoran",
+    "battery": "Pil",
+    "lastUpdated": "Son güncelleme: {datetime}",
+    "@lastUpdated": {
+        "description": "Last updated label with datetime",
+        "placeholders": {
+            "datetime": {
+                "type": "String",
+                "example": "2024-01-01 12:00:00"
+            }
+        }
+    },
+    "selectDateRange": "Tarih Aralığı Seç",
+    "noTemperatureData": "Seçilen tarih aralığında sıcaklık verisi yok",
+    "temperatureHistory": "Sıcaklık Geçmişi",
+    "temperatureChart": "Sıcaklık Grafiği",
+    "temperatureTable": "Sıcaklık Tablosu",
+    "menuHome": "ANA SAYFA",
+    "menuOpeningChecks": "AÇILIŞ KONTROLLERİ",
+    "menuClosingChecks": "KAPANIŞ KONTROLLERİ",
+    "menuTemperatures": "SICAKLIKLAR",
+    "menuTeam": "EKİP",
+    "menuIncidents": "OLAYLAR",
+    "menuReports": "RAPORLAR",
+    "menuAllergyCheck": "ALERJİ KONTROLÜ",
+    "menuSetup": "AYARLAR",
+    "menuLogout": "ÇIKIŞ",
+    "temperatureUnit": "Sıcaklık Birimi",
+    "selectReportFrequency": "Rapor sıklığını seçin",
+    "chooseReportRange": "Lütfen aşağıdan rapor aralığını seçin",
+    "thisWeek": "Bu Hafta",
+    "thisMonth": "Bu Ay",
+    "customRange": "Özel Aralık",
+    "selectedRange": "Seçilen Aralık: {start} - {end}",
+    "@selectedRange": {
+        "description": "Shows the selected date range",
+        "placeholders": {
+            "start": {
+                "type": "String",
+                "example": "Jan 01, 2024"
+            },
+            "end": {
+                "type": "String",
+                "example": "Jan 31, 2024"
+            }
+        }
+    },
+    "reportContents": "Rapor içeriği:",
+    "openingChecks": "Açılış Kontrolleri",
+    "closingChecks": "Kapanış Kontrolleri",
+    "temperatureReadings": "Sıcaklık Okumaları",
+    "incidentsLogged": "Kaydedilen Olaylar",
+    "downloading": "İndiriliyor...",
+    "downloadReport": "Raporu İndir",
+    "selectDateFirst": "Lütfen önce bir tarih aralığı seçin",
+    "downloadSuccess": "Rapor başarıyla indirildi",
+    "downloadError": "Rapor indirilirken hata: {error}",
+    "@downloadError": {
+        "description": "Error message when download fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "noTasksAvailable": "Görev yok",
+    "alertSettings": "Uyarı Ayarları",
+    "visualAlerts": "Görsel Uyarılar",
+    "showPopupNotifications": "Açılır bildirimleri göster",
+    "audioAlerts": "Sesli Uyarılar",
+    "playSoundNotifications": "Sesli bildirimleri çal",
+    "temperatures": "Sıcaklıklar",
+    "selectSensorPrompt": "Detayları görmek için yukarıdaki listeden bir sensör seçin",
+    "noSensorData": "Sensör verisi yok",
+    "sensorId": "Sensör ID: {id}",
+    "@sensorId": {
+        "description": "Sensor ID label with value",
+        "placeholders": {
+            "id": {
+                "type": "String",
+                "example": "SENSOR001"
+            }
+        }
+    },
+    "temperatureValue": "Sıcaklık: {value}°C",
+    "@temperatureValue": {
+        "description": "Temperature value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "25.5"
+            }
+        }
+    },
+    "batteryValue": "Pil: {value}%",
+    "@batteryValue": {
+        "description": "Battery value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "85"
+            }
+        }
+    },
+    "sensorList": "Sensör Listesi",
+    "currentState": "Mevcut Durum",
+    "temperatureSetting": "Sıcaklık Ayarı",
+    "noTemperatureSettings": "Sıcaklık ayarı yok",
+    "minTemp": "Min: {value}°C",
+    "@minTemp": {
+        "description": "Minimum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemp": "Maks: {value}°C",
+    "@maxTemp": {
+        "description": "Maximum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "alertEnabled": "Uyarı: Açık",
+    "alertDisabled": "Uyarı: Kapalı",
+    "delayMinutes": "Gecikme: {value} dakika",
+    "@delayMinutes": {
+        "description": "Delay in minutes label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5"
+            }
+        }
+    },
+    "minTemperature": "Min Sıcaklık: {value}°C",
+    "@minTemperature": {
+        "description": "Minimum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemperature": "Maks Sıcaklık: {value}°C",
+    "@maxTemperature": {
+        "description": "Maximum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "temperatureAlert": "Sıcaklık Uyarısı:",
+    "delayBeforeAlert": "Uyarı Öncesi Gecikme (dakika):",
+    "enterDelayMinutes": "Gecikme dakikasını girin",
+    "pleaseEnterDelay": "Lütfen bir gecikme değeri girin",
+    "enterValidNumber": "Lütfen geçerli bir pozitif tam sayı girin",
+    "customerAllergy": "MÜŞTERİ ALERJİSİ",
+    "enterAllergens": "Alerjenleri girin",
+    "searching": "Aranıyor...",
+    "pleaseEnterAllergens": "Lütfen kontrol edilecek alerjenleri girin",
+    "safeItems": "ALERJİ İÇERMEYEN SONUÇLAR",
+    "unsafeItems": "ALERJİ İÇEREN SONUÇLAR",
+    "teamMembersList": "EKİP ÜYELERİ LİSTESİ",
+    "retry": "Tekrar Dene",
+    "failedToLoadTeamMembers": "Ekip üyeleri yüklenemedi: {error}",
+    "@failedToLoadTeamMembers": {
+        "description": "Error message when team members loading fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "404"
+            }
+        }
+    },
+    "errorFetchingTeamMembers": "Ekip üyeleri alınırken hata: {error}",
+    "@errorFetchingTeamMembers": {
+        "description": "Error message when fetching team members fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "name": "AD",
+    "userLevel": "KULLANICI SEVİYESİ",
+    "emailAddress": "E-POSTA ADRESİ",
+    "trainingLevel": "EĞİTİM SEVİYESİ"
+} 

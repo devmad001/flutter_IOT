@@ -99,7 +99,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get backup => 'Kopia zapasowa i przywracanie';
 
   @override
-  String get backupSubtitle => 'Zarządzanie kopiami zapasowymi i przywracaniem danych';
+  String get backupSubtitle =>
+      'Zarządzanie kopiami zapasowymi i przywracaniem danych';
 
   @override
   String get viewChecklist => 'ZOBACZ LISTĘ';
@@ -134,7 +135,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get selectDateRange => 'Wybierz zakres dat';
 
   @override
-  String get noTemperatureData => 'Brak danych o temperaturze dla wybranego zakresu dat';
+  String get noTemperatureData =>
+      'Brak danych o temperaturze dla wybranego zakresu dat';
 
   @override
   String get temperatureHistory => 'Historia temperatury';
@@ -252,7 +254,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get temperatures => 'Temperatures';
 
   @override
-  String get selectSensorPrompt => 'Select a sensor from the list above to view details.';
+  String get selectSensorPrompt =>
+      'Select a sensor from the list above to view details.';
 
   @override
   String get noSensorData => 'No sensor data available.';
@@ -374,5 +377,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get emailAddress => 'EMAIL ADDRESS';
 
   @override
-  String get trainingLevel => 'TRAINING LEVEL';
+  String get trainingLevel => 'Poziom szkolenia';
+
+  @override
+  String get checklistCompletedSuccessfully =>
+      'Lista kontrolna została pomyślnie ukończona';
 }

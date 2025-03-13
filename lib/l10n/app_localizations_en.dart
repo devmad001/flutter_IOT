@@ -134,7 +134,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectDateRange => 'Select Date Range';
 
   @override
-  String get noTemperatureData => 'No temperature data available for the selected date range';
+  String get noTemperatureData =>
+      'No temperature data available for the selected date range';
 
   @override
   String get temperatureHistory => 'Temperature History';
@@ -252,7 +253,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get temperatures => 'Temperatures';
 
   @override
-  String get selectSensorPrompt => 'Select a sensor from the list above to view details.';
+  String get selectSensorPrompt =>
+      'Select a sensor from the list above to view details.';
 
   @override
   String get noSensorData => 'No sensor data available.';
@@ -374,5 +376,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailAddress => 'EMAIL ADDRESS';
 
   @override
-  String get trainingLevel => 'TRAINING LEVEL';
+  String get trainingLevel => 'Training Level';
+
+  @override
+  String get checklistCompletedSuccessfully =>
+      'Checklist completed successfully';
 }

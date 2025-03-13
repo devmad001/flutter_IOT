@@ -134,7 +134,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get selectDateRange => 'Tarih Aralığı Seç';
 
   @override
-  String get noTemperatureData => 'Seçilen tarih aralığında sıcaklık verisi yok';
+  String get noTemperatureData =>
+      'Seçilen tarih aralığında sıcaklık verisi yok';
 
   @override
   String get temperatureHistory => 'Sıcaklık Geçmişi';
@@ -252,7 +253,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get temperatures => 'Sıcaklıklar';
 
   @override
-  String get selectSensorPrompt => 'Detayları görmek için yukarıdaki listeden bir sensör seçin';
+  String get selectSensorPrompt =>
+      'Detayları görmek için yukarıdaki listeden bir sensör seçin';
 
   @override
   String get noSensorData => 'Sensör verisi yok';
@@ -340,7 +342,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get searching => 'Aranıyor...';
 
   @override
-  String get pleaseEnterAllergens => 'Lütfen kontrol edilecek alerjenleri girin';
+  String get pleaseEnterAllergens =>
+      'Lütfen kontrol edilecek alerjenleri girin';
 
   @override
   String get safeItems => 'ALERJİ İÇERMEYEN SONUÇLAR';
@@ -374,5 +377,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get emailAddress => 'E-POSTA ADRESİ';
 
   @override
-  String get trainingLevel => 'EĞİTİM SEVİYESİ';
+  String get trainingLevel => 'Eğitim Seviyesi';
+
+  @override
+  String get checklistCompletedSuccessfully =>
+      'Kontrol listesi başarıyla tamamlandı';
 }

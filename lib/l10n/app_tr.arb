@@ -233,5 +233,9 @@
     "name": "AD",
     "userLevel": "KULLANICI SEVİYESİ",
     "emailAddress": "E-POSTA ADRESİ",
-    "trainingLevel": "EĞİTİM SEVİYESİ"
+    "trainingLevel": "Eğitim Seviyesi",
+    "checklistCompletedSuccessfully": "Kontrol listesi başarıyla tamamlandı",
+    "@checklistCompletedSuccessfully": {
+        "description": "Message shown when checklist is completed"
+    }
 } 

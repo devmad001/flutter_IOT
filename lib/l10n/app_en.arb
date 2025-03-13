@@ -368,8 +368,12 @@
     "@emailAddress": {
         "description": "Column header for email address"
     },
-    "trainingLevel": "TRAINING LEVEL",
+    "trainingLevel": "Training Level",
     "@trainingLevel": {
         "description": "Column header for training level"
+    },
+    "checklistCompletedSuccessfully": "Checklist completed successfully",
+    "@checklistCompletedSuccessfully": {
+        "description": "Message shown when checklist is completed"
     }
 }

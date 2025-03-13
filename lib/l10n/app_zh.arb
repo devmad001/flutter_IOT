@@ -112,5 +112,9 @@
     "name": "姓名",
     "userLevel": "用户级别",
     "emailAddress": "电子邮箱",
-    "trainingLevel": "培训级别"
+    "trainingLevel": "培训级别",
+    "checklistCompletedSuccessfully": "清单已完成",
+    "@checklistCompletedSuccessfully": {
+        "description": "Message shown when checklist is completed"
+    }
 }

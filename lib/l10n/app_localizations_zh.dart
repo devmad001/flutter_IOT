@@ -375,4 +375,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get trainingLevel => '培训级别';
+
+  @override
+  String get checklistCompletedSuccessfully => '清单已完成';
 }

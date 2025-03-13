@@ -233,5 +233,9 @@
     "name": "NOME",
     "userLevel": "LIVELLO UTENTE",
     "emailAddress": "INDIRIZZO EMAIL",
-    "trainingLevel": "LIVELLO DI FORMAZIONE"
+    "trainingLevel": "Livello di Formazione",
+    "checklistCompletedSuccessfully": "Checklist completata con successo",
+    "@checklistCompletedSuccessfully": {
+        "description": "Message shown when checklist is completed"
+    }
 } 

@@ -84,7 +84,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get notifications => 'Notifiche';
 
   @override
-  String get notificationsSubtitle => 'Configura le impostazioni delle notifiche';
+  String get notificationsSubtitle =>
+      'Configura le impostazioni delle notifiche';
 
   @override
   String get language => 'Lingua';
@@ -134,7 +135,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get selectDateRange => 'Seleziona Intervallo Date';
 
   @override
-  String get noTemperatureData => 'Nessun dato di temperatura disponibile per l\'intervallo selezionato';
+  String get noTemperatureData =>
+      'Nessun dato di temperatura disponibile per l\'intervallo selezionato';
 
   @override
   String get temperatureHistory => 'Storico Temperature';
@@ -182,7 +184,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get selectReportFrequency => 'Seleziona la frequenza dei rapporti';
 
   @override
-  String get chooseReportRange => 'Seleziona l\'intervallo del rapporto qui sotto';
+  String get chooseReportRange =>
+      'Seleziona l\'intervallo del rapporto qui sotto';
 
   @override
   String get thisWeek => 'Questa Settimana';
@@ -252,7 +255,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get temperatures => 'Temperature';
 
   @override
-  String get selectSensorPrompt => 'Seleziona un sensore dalla lista sopra per vedere i dettagli';
+  String get selectSensorPrompt =>
+      'Seleziona un sensore dalla lista sopra per vedere i dettagli';
 
   @override
   String get noSensorData => 'Nessun dato del sensore disponibile';
@@ -282,7 +286,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get temperatureSetting => 'Impostazione Temperatura';
 
   @override
-  String get noTemperatureSettings => 'Nessuna impostazione temperatura disponibile';
+  String get noTemperatureSettings =>
+      'Nessuna impostazione temperatura disponibile';
 
   @override
   String minTemp(String value) {
@@ -328,7 +333,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pleaseEnterDelay => 'Inserisci un valore di ritardo';
 
   @override
-  String get enterValidNumber => 'Inserisci un numero intero non negativo valido';
+  String get enterValidNumber =>
+      'Inserisci un numero intero non negativo valido';
 
   @override
   String get customerAllergy => 'ALLERGIE CLIENTE';
@@ -374,5 +380,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get emailAddress => 'INDIRIZZO EMAIL';
 
   @override
-  String get trainingLevel => 'LIVELLO DI FORMAZIONE';
+  String get trainingLevel => 'Livello di Formazione';
+
+  @override
+  String get checklistCompletedSuccessfully =>
+      'Checklist completata con successo';
 }

@@ -306,7 +306,14 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Complete checklist successfully'),
+            title: Row(
+              children: [
+                Text(AppLocalizations.of(context)!
+                    .checklistCompletedSuccessfully),
+                SizedBox(width: 8),
+                Icon(Icons.check_box, color: Colors.green),
+              ],
+            ),
             actions: [
               TextButton(
                 onPressed: () async {

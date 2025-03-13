@@ -53,5 +53,10 @@
     "menuReports": "RAPORTY",
     "menuAllergyCheck": "KONTROLA ALERGII",
     "menuSetup": "USTAWIENIA",
-    "menuLogout": "WYLOGUJ"
+    "menuLogout": "WYLOGUJ",
+    "trainingLevel": "Poziom szkolenia",
+    "checklistCompletedSuccessfully": "Lista kontrolna została pomyślnie ukończona",
+    "@checklistCompletedSuccessfully": {
+        "description": "Message shown when checklist is completed"
+    }
 }

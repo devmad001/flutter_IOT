@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import 'package:guardstar/providers/language_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 //import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 
 class ReportPage extends StatefulWidget {
   final String token;
@@ -117,11 +118,11 @@ class _ReportPageState extends State<ReportPage> {
         final file = File('${output.path}/$fileName');
         await file.writeAsBytes(await pdf.save());
 
-        // final params = SaveFileDialogParams(
-        //   sourceFilePath: file.path,
-        //   fileName: fileName,
-        // );
-        // await FlutterFileDialog.saveFile(params: params);
+        final params = SaveFileDialogParams(
+          sourceFilePath: file.path,
+          fileName: fileName,
+        );
+        await FlutterFileDialog.saveFile(params: params);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

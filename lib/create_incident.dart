@@ -5,6 +5,8 @@ import 'package:guardstar/config.dart';
 import 'home.dart';
 import 'incident.dart';
 import 'package:guardstar/sidebar_layout.dart';
+import 'package:provider/provider.dart';
+import 'package:guardstar/providers/language_provider.dart';
 
 class CreateIncidentPage extends StatefulWidget {
   final String token;
@@ -26,20 +28,37 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
     final employeeName = _employeeNameController.text.trim();
     final resolution = _resolutionController.text.trim();
 
-    // if (incident.isEmpty || employeeName.isEmpty) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text("Please fill all fields")),
-    //   );
-    //   return;
-    // }
+    // Get the current selected language from the provider
+    final language = Provider.of<LanguageProvider>(context, listen: false)
+        .currentLocale
+        .languageCode;
 
     setState(() {
       _isSubmitting = true;
     });
+    print('Language: $language');
+    String displayLanguage;
+    if (language == 'en') {
+      displayLanguage = 'English';
+    } else if (language == 'pl') {
+      displayLanguage = 'Polish';
+    } else if (language == 'zh') {
+      displayLanguage = 'Chinese';
+    } else if (language == 'tr') {
+      displayLanguage = 'Turkish';
+    } else if (language == 'it') {
+      displayLanguage = 'Italian';
+    } else {
+      displayLanguage = language;
+    }
+    String status = 'Open';
 
-    final url =
-        '${Config.baseUrl}/user/incidents'; // Replace with your backend IP
+    if (resolution != '') {
+      status = 'Resolved';
+    }
 
+    final url = '${Config.baseUrl}/user/incidents?lng=$displayLanguage';
+    print('URL: $url');
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -51,13 +70,14 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
           'incident': incident,
           'employeeName': employeeName,
           'resolution': resolution,
+          'status': status,
         }),
       );
-       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Incident Created Successfully")),
-        );
+      print('Response: ${response.body}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Incident Created Successfully")),
+      );
       Navigator.pop(context);
-       
     } catch (e) {
       print('Error creating incident: $e');
     } finally {

@@ -23,6 +23,10 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
   String dueTime = '';
   final ScrollController _scrollController = ScrollController();
   double _scrollPosition = 0.0;
+  String tempInputValue = '';
+  // Add a map to store controllers for each task
+  final Map<String, TextEditingController> _controllers = {};
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +37,8 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
 
   @override
   void dispose() {
+    // Dispose all text controllers
+    _controllers.forEach((_, controller) => controller.dispose());
     // Remove scroll listener
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
@@ -108,21 +114,29 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
     }
   }
 
-  Future<void> updateTaskStatus(String taskId, bool isCompleted,
-      {String? comment}) async {
+  Future<void> updateTaskContent(
+      String taskId, bool isCompleted, String content) async {
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = isCompleted ? 'completed' : 'pending';
+
+    if (content == "")
+      return; // if the task is content and the content is empty, return
+
     setState(() {
       isLoading = true;
     });
+
     try {
       final Map<String, dynamic> body = {
         'status': status,
       };
-      if (comment != '') {
-        body['comment'] = comment;
-      }
+
+      body['content'] =
+          content; // if the task is content and the content has, add the content to the body
+
+      // Store current scroll position before fetching
       _scrollPosition = _scrollController.position.pixels;
+
       await http.patch(
         Uri.parse(url),
         headers: {
@@ -131,7 +145,10 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
         },
         body: jsonEncode(body),
       );
-      fetchTasks(); // Refresh tasks after updating
+
+      await fetchTasks(); // Refresh tasks after updating
+
+      // Wait for the next frame to ensure the list is built
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           _scrollController.jumpTo(_scrollPosition);
@@ -140,6 +157,95 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
 
       setState(() {
         isLoading = false;
+        tempInputValue = "";
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> updateTaskComment(String taskId, String comment) async {
+    final url = '${Config.baseUrl}/user/checklists/$taskId';
+    final status = 'pending';
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final Map<String, dynamic> body = {
+        'status': status,
+      };
+      if (comment != '') {
+        body['comment'] = comment;
+      }
+      // Store current scroll position before fetching
+      _scrollPosition = _scrollController.position.pixels;
+
+      await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      await fetchTasks(); // Refresh tasks after updating
+
+      // Wait for the next frame to ensure the list is built
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollPosition);
+        }
+      });
+
+      setState(() {
+        isLoading = false;
+        tempInputValue = "";
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
+  Future<void> updateTaskStatus(String taskId, bool isCompleted) async {
+    final url = '${Config.baseUrl}/user/checklists/$taskId';
+    final status = isCompleted ? 'completed' : 'pending';
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final Map<String, dynamic> body = {
+        'status': status,
+      };
+
+      // Store current scroll position before fetching
+      _scrollPosition = _scrollController.position.pixels;
+
+      await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${widget.token}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+
+      await fetchTasks(); // Refresh tasks after updating
+
+      // Wait for the next frame to ensure the list is built
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollPosition);
+        }
+      });
+
+      setState(() {
+        isLoading = false;
+        tempInputValue = "";
       });
     } catch (e) {
       print('Error: $e');
@@ -310,16 +416,45 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
 
                                   return ListTile(
                                     title: Text(taskTitle),
+                                    subtitle: task['isInput'] == true
+                                        ? TextField(
+                                            controller:
+                                                _controllers.putIfAbsent(
+                                              task['_id'],
+                                              () => TextEditingController(
+                                                  text: taskcontent),
+                                            ),
+                                            onChanged: (value) {
+                                              setState(() {
+                                                tempInputValue = value;
+                                              });
+                                            },
+                                            decoration: InputDecoration(
+                                              border: OutlineInputBorder(),
+                                              contentPadding:
+                                                  EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4),
+                                            ),
+                                          )
+                                        : null,
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         GestureDetector(
                                           onTap: () {
-                                            if (taskcontent != '') {
-                                              updateTaskStatus(
+                                            if (task['isInput'] == true) {
+                                              updateTaskContent(
                                                   task['_id'],
-                                                  task['status'] !=
-                                                      'completed');
+                                                  task['status'] != 'completed',
+                                                  tempInputValue != ""
+                                                      ? tempInputValue
+                                                      : taskcontent);
+                                            } else {
+                                              updateTaskStatus(
+                                                task['_id'],
+                                                task['status'] != 'completed',
+                                              );
                                             }
                                           },
                                           child: Container(
@@ -377,10 +512,10 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
                                                           String comment =
                                                               commentController
                                                                   .text;
-                                                          updateTaskStatus(
-                                                              task['_id'],
-                                                              false,
-                                                              comment: comment);
+                                                          updateTaskComment(
+                                                            task['_id'],
+                                                            comment,
+                                                          );
                                                           Navigator.of(context)
                                                               .pop();
                                                         },

@@ -16,10 +16,12 @@ class SensorDataProvider extends ChangeNotifier {
       if (data != null) {
         print(data);
         final List<Map<String, dynamic>> newSensorData = List.from(_sensorData);
+        print(newSensorData);
         final index = newSensorData
-            .indexWhere((sensor) => sensor['device_eui'] == data['device_eui']);
+            .indexWhere((sensor) => sensor['dev_eui'] == data['device_eui']);
 
         Map<String, dynamic> updatedSensor;
+        print(index);
         if (index != -1) {
           // Update existing sensor data
           updatedSensor = {
@@ -29,6 +31,8 @@ class SensorDataProvider extends ChangeNotifier {
             'timestamp': data['timestamp'] ?? DateTime.now().toIso8601String(),
           };
           newSensorData[index] = updatedSensor;
+          print("@@@");
+          print(updatedSensor);
         }
 
         _sensorData = newSensorData;

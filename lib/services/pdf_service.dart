@@ -135,13 +135,23 @@ class PdfService {
             flex: 3,
             child: pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              color: contentBackgroundColor,
+              color: task['isDateRecord']
+                  ? PdfColors.white
+                  : contentBackgroundColor,
               child: pw.Align(
                 alignment: pw.Alignment.centerRight,
                 child: pw.Text(
-                  isCompleted && content.isEmpty ? 'Yes' : content,
+                  task['isDateRecord']
+                      ? DateFormat('dd MMM yyyy hh:mm a')
+                              .format(DateTime.parse(task['createdAt'])) +
+                          ' GMT'
+                      : (isCompleted && content.isEmpty)
+                          ? 'Yes'
+                          : content,
                   style: _getTextStyle(
-                    color: contentTextColor,
+                    color: task['isDateRecord']
+                        ? PdfColors.black
+                        : contentTextColor,
                     languageCode: languageCode,
                   ),
                 ),
@@ -196,7 +206,7 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildTemperatureRow(
+  static pw.Widget _buildTemperatureRowWithDate(
       String sensorId, String temperature, String languageCode) {
     return pw.Container(
       decoration: pw.BoxDecoration(
@@ -206,7 +216,7 @@ class PdfService {
       child: pw.Row(
         children: [
           pw.Expanded(
-            flex: 7,
+            flex: 4,
             child: pw.Container(
               padding: const pw.EdgeInsets.all(10),
               child: pw.Text(sensorId,
@@ -218,7 +228,7 @@ class PdfService {
             child: pw.Container(
               padding: const pw.EdgeInsets.all(10),
               child: pw.Align(
-                alignment: pw.Alignment.centerRight,
+                alignment: pw.Alignment.center,
                 child: pw.Text(
                   temperature + "°C",
                   style: _getTextStyle(languageCode: languageCode),
@@ -278,15 +288,36 @@ class PdfService {
                   data['openingTasks'].length,
                   (index) {
                     final task = data['openingTasks'][index];
-                    if (task['isTemperature'] == true) {
+                    print(task['completeat']);
+                    if (task['isTemperature'] == true &&
+                        task['completeat'] != null) {
+                      // Filter sensor data for the task's completedAt date
+                      final taskDate = task['completeat'];
+                      // Convert ISO timestamp to date-only format (YYYY-MM-DD)
+                      final taskDateOnly = taskDate.substring(0, 10);
+                      final relevantSensorData = data['sensorData']
+                          .where(
+                              (sensor) => sensor['_id']['date'] == taskDateOnly)
+                          .toList();
+
+                      // Calculate temperatures for the specific date
+                      final Map<String, double> dateTemperatures = {};
+                      for (final sensor in relevantSensorData) {
+                        final deviceId = sensor['_id']['device_id'];
+                        final temp = sensor['averageTemperature'] as double;
+                        dateTemperatures[deviceId] = temp;
+                      }
+
                       return pw.Column(
-                        children: averageTemperatures.entries.map((entry) {
-                          return _buildTemperatureRow(
-                            entry.key,
-                            '${entry.value.toStringAsFixed(2)}',
-                            languageCode,
-                          );
-                        }).toList(),
+                        children: [
+                          ...dateTemperatures.entries.map((entry) {
+                            return _buildTemperatureRowWithDate(
+                              entry.key,
+                              '${entry.value.toStringAsFixed(2)}',
+                              languageCode,
+                            );
+                          }).toList(),
+                        ],
                       );
                     } else {
                       return _buildTaskRow(
@@ -300,30 +331,6 @@ class PdfService {
                 ),
 
                 // Closing Tasks
-                ...List<pw.Widget>.generate(
-                  data['closingTasks'].length,
-                  (index) {
-                    final task = data['closingTasks'][index];
-                    if (task['isTemperature'] == true) {
-                      return pw.Column(
-                        children: averageTemperatures.entries.map((entry) {
-                          return _buildTemperatureRow(
-                            entry.key,
-                            '${entry.value.toStringAsFixed(2)}',
-                            languageCode,
-                          );
-                        }).toList(),
-                      );
-                    } else {
-                      return _buildTaskRow(
-                        task,
-                        task['status'] == 'completed',
-                        task['isSection'] == true,
-                        languageCode,
-                      );
-                    }
-                  },
-                ),
 
                 // Incident List Header
                 pw.SizedBox(height: 20),

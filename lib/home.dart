@@ -25,7 +25,8 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   // Providers
   SocketProvider? _socketProvider;
   SensorDataProvider? _sensorDataProvider;
@@ -35,12 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = false;
   bool openingChecklistCompleted = false;
   bool closingChecklistCompleted = false;
+  late AnimationController _flashController;
+  late Animation<double> _flashAnimation;
 
   // Date range for temperature history
   DateTimeRange? selectedDateRange;
   List<Map<String, dynamic>> temperatureHistory = [];
   bool isHistoryLoading = false;
-
+  bool _isInitialized = false;
   // Add new state for chart data
   List<String> chartLabels = [];
   Map<String, List<double>> temperatureDataByDevice = {};
@@ -56,28 +59,34 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _initializeProviders();
+    _flashController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _flashAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_flashController);
   }
 
   void _initializeProviders() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    if (!mounted) return;
 
-      _socketProvider = Provider.of<SocketProvider>(context, listen: false);
-      _sensorDataProvider =
-          Provider.of<SensorDataProvider>(context, listen: false);
+    _socketProvider = Provider.of<SocketProvider>(context, listen: false);
+    _sensorDataProvider =
+        Provider.of<SensorDataProvider>(context, listen: false);
 
-      // Initialize socket with sensor data provider
-
-      fetchSensorData();
-      fetchChecklistStatus();
-      setState(() {
-        isHistoryLoading = true;
-      });
+    // Initialize socket with sensor data provider
+    fetchSensorData();
+    fetchChecklistStatus();
+    setState(() {
+      isHistoryLoading = true;
+      _isInitialized = true;
     });
   }
 
   @override
   void dispose() {
+    _flashController.dispose();
     if (_socketCallback != null && _socketProvider != null) {
       try {
         //_socketProvider?.disconnect();
@@ -273,8 +282,11 @@ class _HomeScreenState extends State<HomeScreen> {
             };
           }
         }
+        print("#########");
+        print(sensorRecords);
         sensorData = sensorRecords
             .map((record) => {
+                  'dev_eui': record['dev_eui'],
                   'device_id': record['sensor_id'],
                   'restaurantName':
                       record['restaurant_id']['name'] ?? 'Unknown Restaurant',
@@ -297,6 +309,67 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       _sensorDataProvider?.setError('Error fetching sensor data: $e');
     }
+  }
+
+  void _showTemperatureAlert(
+      String deviceId, double temperature, double minTemp, double maxTemp) {
+    //if (!_isInitialized) return;
+
+    if (!mounted) return;
+
+    print("@@@@@@");
+    print(deviceId);
+    print(temperature);
+    print(minTemp);
+    print(maxTemp);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.red,
+          title: const Center(
+            child: Text(
+              'Warning',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          content: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.2,
+            child: Center(
+              child: Text(
+                ' $deviceId \n\n'
+                'OUTSIDE OF SAFE TEMPERATURE THRESHOLD',
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            Center(
+              child: SizedBox(
+                width: 200,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                      side: BorderSide(color: Colors.black, width: 2),
+                    ),
+                  ),
+                  child: const Text('Dismiss'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildSensorBoxes() {
@@ -341,76 +414,97 @@ class _HomeScreenState extends State<HomeScreen> {
                     final tempValue = double.parse(temperature);
                     displayTemp =
                         metricsProvider.getTemperatureWithUnit(tempValue);
+
+                    // _showTemperatureAlert(
+                    //     deviceId, tempValue, minTemp, maxTemp);
                   } catch (e) {
                     displayTemp = '$temperature°C';
                   }
                 }
 
-                return Container(
-                  width: 180,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.green, width: 2),
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        deviceId,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                final isOutOfRange = temperature != '--' &&
+                        (double.tryParse(temperature) ?? 0) < minTemp ||
+                    (double.tryParse(temperature) ?? 0) > maxTemp;
+
+                return AnimatedBuilder(
+                  animation: _flashAnimation,
+                  builder: (context, child) {
+                    Color borderColor = Colors.green;
+                    if (isOutOfRange) {
+                      borderColor = Color.lerp(
+                          Colors.white, Colors.red, _flashAnimation.value)!;
+                    }
+
+                    return Container(
+                      width: 180,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: borderColor,
+                          width: 4,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.white,
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(l10n.temperature),
                           Text(
-                            displayTemp,
-                            style: TextStyle(
-                              color: _getTemperatureColor(
-                                double.tryParse(temperature) ?? 0,
-                                minTemp,
-                                maxTemp,
+                            deviceId,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Text(l10n.temperature),
+                              Text(
+                                displayTemp,
+                                style: TextStyle(
+                                  color: _getTemperatureColor(
+                                    double.tryParse(temperature) ?? 0,
+                                    minTemp,
+                                    maxTemp,
+                                  ),
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              fontWeight: FontWeight.bold,
-                            ),
+                            ],
                           ),
+                          const SizedBox(height: 4),
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   children: [
+                          //     Text(l10n.battery),
+                          //     Text(
+                          //       '$battery%',
+                          //       style: TextStyle(
+                          //         color: (double.tryParse(battery) ?? 0) > 20
+                          //             ? Colors.green
+                          //             : Colors.red,
+                          //         fontWeight: FontWeight.bold,
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          const SizedBox(height: 4),
+                          // Text(
+                          //   l10n.lastUpdated(_formatTimestamp(timestamp)),
+                          //   style: const TextStyle(
+                          //     fontSize: 12,
+                          //     color: Colors.grey,
+                          //   ),
+                          // ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(l10n.battery),
-                          Text(
-                            '$battery%',
-                            style: TextStyle(
-                              color: (double.tryParse(battery) ?? 0) > 20
-                                  ? Colors.green
-                                  : Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.lastUpdated(_formatTimestamp(timestamp)),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               }).toList(),
             );

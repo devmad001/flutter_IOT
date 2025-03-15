@@ -3,6 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/notification_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/material.dart';
+
 class SocketService {
   static SocketService? _instance;
   IO.Socket? socket;
@@ -21,6 +24,27 @@ class SocketService {
   }
 
   Future<void> _initNotifications() async {
+    // Request notification permission for Android 13+
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
+
+    // Create the notification channel with high importance
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'sensor_data_channel',
+      'Sensor Data Notifications',
+      description: 'Notifications for new sensor data',
+      importance: Importance.max,
+      enableVibration: true,
+      playSound: true,
+    );
+
+    // Create the Android-specific notification channel
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -122,6 +146,9 @@ class SocketService {
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
+      fullScreenIntent: true,
+      category: AndroidNotificationCategory.alarm,
+      color: Color.fromARGB(255, 255, 0, 0),
     );
 
     const NotificationDetails platformChannelSpecifics =
@@ -130,27 +157,33 @@ class SocketService {
     String title;
     String body;
     bool _visualAlerts = true;
-      bool _audioAlerts = true;
+    bool _audioAlerts = true;
     final prefs = await SharedPreferences.getInstance();
-     _visualAlerts = prefs.getBool('visualAlerts') ?? true;
-      _audioAlerts = prefs.getBool('audioAlerts') ?? true;
+    _visualAlerts = prefs.getBool('visualAlerts') ?? true;
+    _audioAlerts = prefs.getBool('audioAlerts') ?? true;
 
-    print(_visualAlerts);
+    print('Visual alerts enabled: $_visualAlerts');
+    print('Notification event received: $event');
+    print('Notification data: $data');
+
     if (event == 'alertSensorData' && _visualAlerts) {
       final deviceId = data['device_id'] ?? 'Unknown Device';
       final temperature = data['temperature']?.toString() ?? 'unknown';
-      
 
-      title = 'Temperature Alert!';
-      body =
-          'Device $deviceId: Temperature $temperature°C is outside range ';
+      title = '⚠️ WARNING ⚠️';
+      body = '$deviceId\n\n⚠️ OUTSIDE OF SAFE TEMPERATURE THRESHOLD ⚠️';
 
-      await _flutterLocalNotificationsPlugin.show(
-        DateTime.now().millisecond,
-        title,
-        body,
-        platformChannelSpecifics,
-      );
+      try {
+        await _flutterLocalNotificationsPlugin.show(
+          DateTime.now().millisecond,
+          title,
+          body,
+          platformChannelSpecifics,
+        );
+        print('Notification shown successfully');
+      } catch (e) {
+        print('Error showing notification: $e');
+      }
     }
   }
 

@@ -7,6 +7,9 @@ import 'package:guardstar/sidebar_layout.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:provider/provider.dart';
+import 'package:guardstar/providers/sensor_data_provider.dart';
+import 'package:guardstar/providers/metrics_provider.dart';
 
 class OpeningChecklistPage extends StatefulWidget {
   final String token;
@@ -343,9 +346,95 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
     }
   }
 
+  Color _getTemperatureColor(
+      double temperature, double minTemp, double maxTemp) {
+    if (temperature < minTemp || temperature > maxTemp) {
+      return Colors.red;
+    }
+    return Colors.green;
+  }
+
+  Widget _buildTemperatureWidget(
+      BuildContext context, List<dynamic> sensorData) {
+    final metricsProvider = Provider.of<MetricsProvider>(context);
+    return Consumer<SensorDataProvider>(
+      builder: (context, sensorProvider, child) {
+        if (sensorProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (sensorData.isEmpty) {
+          return const Text('No temperature data available');
+        }
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: sensorData.length,
+          itemBuilder: (context, index) {
+            final sensor = sensorData[index];
+            final deviceId = sensor['device_id'] ?? 'Unknown';
+            final temperature = sensor['temperature']?.toString() ?? '--';
+            final minTemp = (sensor['min_temp'] ?? 0).toDouble();
+            final maxTemp = (sensor['max_temp'] ?? 5).toDouble();
+
+            String displayTemp = temperature;
+            if (temperature != '--') {
+              try {
+                final tempValue = double.parse(temperature);
+                displayTemp = metricsProvider.getTemperatureWithUnit(tempValue);
+              } catch (e) {
+                displayTemp = '$temperature°C';
+              }
+            }
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        deviceId,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Text(
+                        displayTemp,
+                        style: TextStyle(
+                          color: _getTemperatureColor(
+                            double.tryParse(temperature) ?? 0,
+                            minTemp,
+                            maxTemp,
+                          ),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final metricsProvider = Provider.of<MetricsProvider>(context);
+    final sensorProvider = Provider.of<SensorDataProvider>(context);
+
     return Scaffold(
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -414,6 +503,7 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
                                   String taskcontent =
                                       task['content_$mappedLanguageCode'] ??
                                           task['content_en'];
+
                                   if (task['isSection'] == true) {
                                     return Container(
                                       color: const Color.fromARGB(
@@ -424,129 +514,158 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
                                     );
                                   }
 
-                                  return ListTile(
-                                    title: Text(taskTitle),
-                                    subtitle: task['isInput'] == true
-                                        ? TextField(
-                                            controller:
-                                                _controllers.putIfAbsent(
-                                              task['_id'],
-                                              () => TextEditingController(
-                                                  text: taskcontent),
-                                            ),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                tempInputValue = value;
-                                              });
-                                            },
-                                            decoration: InputDecoration(
-                                              border: OutlineInputBorder(),
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 4),
-                                            ),
-                                          )
-                                        : null,
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            if (task['isInput'] == true) {
-                                              updateTaskContent(
+                                  Widget temperatureWidget =
+                                      const SizedBox.shrink();
+                                  if (task['isTemperature'] == true) {
+                                    temperatureWidget = _buildTemperatureWidget(
+                                        context, sensorProvider.sensorData);
+                                  }
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ListTile(
+                                        title: Text(taskTitle),
+                                        subtitle: task['isInput'] == true
+                                            ? TextField(
+                                                controller:
+                                                    _controllers.putIfAbsent(
                                                   task['_id'],
-                                                  task['status'] != 'completed',
-                                                  tempInputValue != ""
-                                                      ? tempInputValue
-                                                      : taskcontent);
-                                            } else {
-                                              updateTaskStatus(
-                                                task['_id'],
-                                                task['status'] != 'completed',
-                                              );
-                                            }
-                                          },
-                                          child: Container(
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              border: Border.all(
-                                                color: task['status'] ==
-                                                            'completed' ||
-                                                        task['comment'] != ''
-                                                    ? Colors.green
-                                                    : Colors.grey,
-                                                width: 2,
-                                              ),
-                                              color: task['status'] ==
-                                                          'completed' ||
-                                                      task['comment'] != ''
-                                                  ? Colors.green
-                                                  : Colors.grey,
-                                            ),
-                                            child: Icon(
-                                              task['comment'] != ''
-                                                  ? Icons.swap_horiz
-                                                  : Icons.check,
-                                              size: 16,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.more_vert),
-                                          onPressed: () {
-                                            if (task['status'] != 'completed' &&
-                                                task['comment'] == "") {
-                                              showDialog(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  TextEditingController
-                                                      commentController =
-                                                      TextEditingController();
-                                                  return AlertDialog(
-                                                    title: Text('Add Comment'),
-                                                    content: TextField(
-                                                      controller:
-                                                          commentController,
-                                                      decoration: InputDecoration(
-                                                          hintText:
-                                                              'Enter your comment here'),
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          String comment =
-                                                              commentController
-                                                                  .text;
-                                                          updateTaskComment(
-                                                            task['_id'],
-                                                            comment,
-                                                          );
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: Text('Submit'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: Text('Close'),
-                                                      ),
-                                                    ],
-                                                  );
+                                                  () => TextEditingController(
+                                                      text: taskcontent),
+                                                ),
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    tempInputValue = value;
+                                                  });
                                                 },
-                                              );
-                                            }
-                                          },
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(),
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                          horizontal: 8,
+                                                          vertical: 4),
+                                                ),
+                                              )
+                                            : null,
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                if (task['isInput'] == true) {
+                                                  updateTaskContent(
+                                                      task['_id'],
+                                                      task['status'] !=
+                                                          'completed',
+                                                      tempInputValue != ""
+                                                          ? tempInputValue
+                                                          : taskcontent);
+                                                } else {
+                                                  updateTaskStatus(
+                                                    task['_id'],
+                                                    task['status'] !=
+                                                        'completed',
+                                                  );
+                                                }
+                                              },
+                                              child: Container(
+                                                width: 24,
+                                                height: 24,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: task['status'] ==
+                                                                'completed' ||
+                                                            task['comment'] !=
+                                                                ''
+                                                        ? Colors.green
+                                                        : Colors.grey,
+                                                    width: 2,
+                                                  ),
+                                                  color: task['status'] ==
+                                                              'completed' ||
+                                                          task['comment'] != ''
+                                                      ? Colors.green
+                                                      : Colors.grey,
+                                                ),
+                                                child: Icon(
+                                                  task['comment'] != ''
+                                                      ? Icons.swap_horiz
+                                                      : Icons.check,
+                                                  size: 16,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.more_vert),
+                                              onPressed: () {
+                                                if (task['status'] !=
+                                                        'completed' &&
+                                                    task['comment'] == "") {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      TextEditingController
+                                                          commentController =
+                                                          TextEditingController();
+                                                      return AlertDialog(
+                                                        title:
+                                                            Text('Add Comment'),
+                                                        content: TextField(
+                                                          controller:
+                                                              commentController,
+                                                          decoration:
+                                                              InputDecoration(
+                                                                  hintText:
+                                                                      'Enter your comment here'),
+                                                        ),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              String comment =
+                                                                  commentController
+                                                                      .text;
+                                                              updateTaskComment(
+                                                                task['_id'],
+                                                                comment,
+                                                              );
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child:
+                                                                Text('Submit'),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child:
+                                                                Text('Close'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      if (task['isTemperature'] == true)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0),
+                                          child: temperatureWidget,
+                                        ),
+                                    ],
                                   );
                                 },
                               ),

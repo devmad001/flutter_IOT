@@ -20,7 +20,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
   String? sensorError;
   Map<String, dynamic> latestSensorData = {};
   String? selectedSensorId;
-
+  String? selectedSensorName="";
   // --- Temperature Settings State ---
   bool settingsLoading = true;
   bool settingsSubmitting = false;
@@ -174,7 +174,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.sensorId(selectedSensorId!),
+                selectedSensorName??"",
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
@@ -185,11 +185,10 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8),
-              Text(
+              latestSensorData['battery']!=null?Text(
                 l10n.batteryValue(latestSensorData['battery'].toString()),
                 style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 8),
+              ): const SizedBox(height: 8),
               Text(
                 l10n.lastUpdated(formatDateTime(latestSensorData['createdAt'])),
                 style: const TextStyle(fontSize: 16),
@@ -252,7 +251,8 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               onTap: () {
                 setState(() {
                   settingId = setting['_id'];
-                  selectedSensorId = setting['sensor_id'];
+                  selectedSensorId = setting['dev_eui'];
+                  selectedSensorName = setting['sensor_id'];
                   minTempSetting = (setting['min_temp'] as num).toDouble();
                   maxTempSetting = (setting['max_temp'] as num).toDouble();
                   alertEnabled = setting['alert'] as bool;

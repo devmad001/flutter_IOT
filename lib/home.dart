@@ -265,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen>
         Map<String, Map<String, dynamic>> temperatureData = {};
         List<Map<String, dynamic>> sensorData = [];
         for (var record in sensorRecords) {
-          final url = '$baseUrl/user/sensor/' + record['sensor_id'];
+          final url = '$baseUrl/user/sensor/' + record['dev_eui'];
           final resTemperture = await http.get(
             Uri.parse(url),
             headers: {'Authorization': 'Bearer ${widget.token}'},
@@ -276,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen>
             final temperature = dataTemperture['data']['temperature'];
             final battery = dataTemperture['data']['battery'];
 
-            temperatureData[record['sensor_id']] = {
+            temperatureData[record['dev_eui']] = {
               'temperature': temperature,
               'battery': battery,
             };
@@ -290,15 +290,16 @@ class _HomeScreenState extends State<HomeScreen>
                   'device_id': record['sensor_id'],
                   'restaurantName':
                       record['restaurant_id']['name'] ?? 'Unknown Restaurant',
-                  'temperature': temperatureData[record['sensor_id']]
+                  'temperature': temperatureData[record['dev_eui']]
                           ?['temperature'] ??
                       '--',
                   'battery':
-                      temperatureData[record['sensor_id']]?['battery'] ?? '--',
+                      temperatureData[record['dev_eui']]?['battery'] ?? '--',
                   'timestamp': DateTime.now()
                       .toIso8601String(), // Will be updated by socket
                   'min_temp': record['min_temp'] ?? 0,
                   'max_temp': record['max_temp'] ?? 5,
+                  'alert':record['alert'] ?? false,
                 })
             .toList();
 

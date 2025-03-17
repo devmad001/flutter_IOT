@@ -11,6 +11,11 @@ import 'report_page.dart';
 import 'allergy_check.dart';
 import 'setup.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import 'providers/sensor_data_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class SidebarLayout extends StatefulWidget {
   final Widget content;
@@ -31,6 +36,8 @@ class SidebarLayout extends StatefulWidget {
 class _SidebarLayoutState extends State<SidebarLayout> {
   String selectedMenu = '';
   late Widget currentContent;
+  SensorDataProvider? _sensorDataProvider;
+  final AudioPlayer _audioPlayer = AudioPlayer();
 
   List<Map<String, dynamic>> _getMenuItems(AppLocalizations l10n) {
     return [
@@ -58,8 +65,127 @@ class _SidebarLayoutState extends State<SidebarLayout> {
   @override
   void initState() {
     super.initState();
+    _initializeProviders();
     selectedMenu = widget.title;
     currentContent = widget.content;
+  }
+
+  void _initializeProviders() {
+    if (!mounted) return;
+    _sensorDataProvider =
+        Provider.of<SensorDataProvider>(context, listen: false);
+    _setupTemperatureMonitoring();
+  }
+
+  void _setupTemperatureMonitoring() {
+    _sensorDataProvider?.addListener(() {
+      if (!mounted) return;
+
+      final sensorData = _sensorDataProvider?.sensorData ?? [];
+      for (var sensor in sensorData) {
+        final deviceId = sensor['device_id'] ?? 'Unknown Device';
+        final temperature = sensor['temperature']?.toString() ?? '--';
+        final minTemp = (sensor['min_temp'] ?? 0).toDouble();
+        final maxTemp = (sensor['max_temp'] ?? 5).toDouble();
+        final alert = sensor['alert'];
+        if (temperature != '--') {
+          try {
+            final tempValue = double.parse(temperature);
+            if (tempValue < minTemp || tempValue > maxTemp) {
+              if (alert) {
+                _showTemperatureAlert(deviceId);
+              }
+            }
+          } catch (e) {
+            print('Error parsing temperature: $e');
+          }
+        }
+      }
+    });
+  }
+
+  void _showTemperatureAlert(String deviceId) async {
+    // Check visual alerts preference
+    final prefs = await SharedPreferences.getInstance();
+    final visualAlertsEnabled = prefs.getBool('visualAlerts') ?? true;
+    final _audioAlerts = prefs.getBool('audioAlerts') ?? true;
+    if (!_audioAlerts) return;
+    if (!visualAlertsEnabled) return;
+
+    print('Audio alert played successfully');
+    // Check when the last alert was shown for this device
+    final lastAlertTimeKey = 'lastAlertTime_$deviceId';
+    final lastAlertTime = prefs.getInt(lastAlertTimeKey) ?? 0;
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+
+    // Calculate if 4 hours have passed (4 hours = 4 * 60 * 60 * 1000 milliseconds)
+    final fourHoursInMillis = 4 * 60 * 60 * 1000;
+    if (currentTime - lastAlertTime < fourHoursInMillis) {
+      // Not enough time has passed since the last alert
+      return;
+    }
+    await _audioPlayer.setSource(AssetSource('alert.mp3'));
+    await _audioPlayer.play(AssetSource('alert.mp3'));
+    // Save the current time as the last alert time for this device
+    await prefs.setInt(lastAlertTimeKey, currentTime);
+
+    FToast fToast = FToast();
+    fToast.init(context);
+
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        color: Colors.red,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(width: 12.0),
+              const Text(
+                'WARNING',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          Text(
+            '$deviceId\n\n\nOUTSIDE OF SAFE TEMPERATURE THRESHOLD\n\n\n',
+            style: const TextStyle(color: Colors.white, fontSize: 18.0),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8.0),
+          ElevatedButton(
+            onPressed: () => fToast.removeCustomToast(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.red,
+            ),
+            child: const Text(
+              'DISMISS',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.CENTER,
+      toastDuration: const Duration(seconds: 5),
+    );
   }
 
   @override

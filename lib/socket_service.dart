@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class SocketService {
   static SocketService? _instance;
@@ -13,9 +14,12 @@ class SocketService {
   final NotificationService _notificationService = NotificationService.instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isAudioPlayerInitialized = false;
 
   SocketService._() {
     _initNotifications();
+    _initAudioPlayer();
   }
 
   static SocketService get instance {
@@ -58,6 +62,40 @@ class SocketService {
         // Handle notification tap
       },
     );
+  }
+
+  Future<void> _initAudioPlayer() async {
+    if (_isAudioPlayerInitialized) return;
+
+    try {
+      print('Initializing audio player...');
+      await _audioPlayer.setSource(AssetSource('alert.mp3'));
+      _isAudioPlayerInitialized = true;
+      print('Audio player initialized successfully');
+    } catch (e, stackTrace) {
+      print('Error initializing audio player: $e');
+      print('Stack trace: $stackTrace');
+      _isAudioPlayerInitialized = false;
+    }
+  }
+
+  Future<void> _playAudioAlert() async {
+    if (!_isAudioPlayerInitialized) {
+      await _initAudioPlayer();
+    }
+
+    if (_isAudioPlayerInitialized) {
+      try {
+        await _audioPlayer.stop();
+        await _audioPlayer.play(AssetSource('alert.mp3'));
+        print('Audio alert played successfully');
+      } catch (e) {
+        print('Error playing audio alert: $e');
+        _isAudioPlayerInitialized = false;
+      }
+    } else {
+      print('Audio player not initialized');
+    }
   }
 
   void initSocket(String token) {
@@ -137,57 +175,29 @@ class SocketService {
   }
 
   Future<void> _showNotificationForEvent(String event, dynamic data) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'sensor_data_channel',
-      'Sensor Data Notifications',
-      channelDescription: 'Notifications for new sensor data',
-      importance: Importance.max,
-      priority: Priority.high,
-      playSound: true,
-      enableVibration: true,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.alarm,
-      color: Color.fromARGB(255, 255, 0, 0),
-    );
-
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    String title;
-    String body;
     bool _visualAlerts = true;
     bool _audioAlerts = true;
     final prefs = await SharedPreferences.getInstance();
     _visualAlerts = prefs.getBool('visualAlerts') ?? true;
     _audioAlerts = prefs.getBool('audioAlerts') ?? true;
 
-    print('Visual alerts enabled: $_visualAlerts');
-    print('Notification event received: $event');
-    print('Notification data: $data');
+    if (_audioAlerts) {
+   // await _playAudioAlert();
+    }
 
-    if (event == 'alertSensorData' && _visualAlerts) {
+    if (_visualAlerts) {
       final deviceId = data['device_id'] ?? 'Unknown Device';
       final temperature = data['temperature']?.toString() ?? 'unknown';
-
-      title = '⚠️ WARNING ⚠️';
-      body = '$deviceId\n\n⚠️ OUTSIDE OF SAFE TEMPERATURE THRESHOLD ⚠️';
-
-      try {
-        await _flutterLocalNotificationsPlugin.show(
-          DateTime.now().millisecond,
-          title,
-          body,
-          platformChannelSpecifics,
-        );
-        print('Notification shown successfully');
-      } catch (e) {
-        print('Error showing notification: $e');
-      }
+      // Add your notification logic here
     }
   }
 
   void emitEvent(String event, dynamic data) {
     socket?.emit(event, data);
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
   }
 }

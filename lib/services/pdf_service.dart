@@ -307,9 +307,39 @@ class PdfService {
                         final temp = sensor['averageTemperature'] as double;
                         dateTemperatures[deviceId] = temp;
                       }
+                      String title = _getLocalizedText(task, 'title', languageCode);
+
+                       
 
                       return pw.Column(
                         children: [
+                          pw.Row(
+                                children: [
+                                  pw.Expanded(
+                                    flex: 7,
+                                    child: pw.Container(
+                                      padding: const pw.EdgeInsets.all(10),
+                                      child: pw.Text(title,
+                                          style: _getTextStyle(languageCode: languageCode)),
+                                    ),
+                                  ),
+                                  pw.Expanded(
+                                    flex: 3,
+                                    child: pw.Container(
+                                      padding: const pw.EdgeInsets.all(10),
+                                      child: pw.Align(
+                                        alignment: pw.Alignment.center,
+                                        child: pw.Text(
+                                          (task['status']=="completed")
+                                            ? 'Yes'
+                                            : '',
+                                          style: _getTextStyle(languageCode: languageCode),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ...dateTemperatures.entries.map((entry) {
                             return _buildTemperatureRowWithDate(
                               entry.key,

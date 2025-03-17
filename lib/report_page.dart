@@ -99,40 +99,134 @@ class _ReportPageState extends State<ReportPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print("@@@@@@@@######");
-        print(data);
+
         // Get current language code from provider
         final languageProvider =
             Provider.of<LanguageProvider>(context, listen: false);
         final currentLanguageCode = languageProvider.currentLocale.languageCode;
 
-        // Generate PDF using the service
-        final pdf = await PdfService.generateReport(
-          startDate: _rangeStart!,
-          endDate: _rangeEnd!,
-          data: data['reportData'],
-          languageCode: currentLanguageCode,
-        );
+        // Cast the data to the expected type
+        final reportData = Map<String, dynamic>.from(data['reportData']);
+        reportData['openingTasks'] =
+            List<Map<String, dynamic>>.from(data['reportData']['openingTasks']);
+        reportData['closingTasks'] =
+            List<Map<String, dynamic>>.from(data['reportData']['closingTasks']);
+        reportData['sensorData'] =
+            List<Map<String, dynamic>>.from(data['reportData']['sensorData']);
+        reportData['incidents'] =
+            List<Map<String, dynamic>>.from(data['reportData']['incidents']);
 
-        // Save PDF to a temporary file
+        // Get temporary directory for file storage
         final output = await getTemporaryDirectory();
-        final fileName = 'report_${DateTime.now().millisecondsSinceEpoch}.pdf';
-        final file = File('${output.path}/$fileName');
-        await file.writeAsBytes(await pdf.save());
 
-        final params = SaveFileDialogParams(
-          sourceFilePath: file.path,
-          fileName: fileName,
-        );
-        await FlutterFileDialog.saveFile(params: params);
+        try {
+          // Generate PDF using the service
+          final pdf = await PdfService.generateReport(
+            startDate: _rangeStart!,
+            endDate: _rangeEnd!,
+            data: reportData,
+            languageCode: currentLanguageCode,
+          );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(AppLocalizations.of(context)!.downloadSuccess)),
-        );
+          // Save PDF to a temporary file
+          final fileName =
+              'report_${DateTime.now().millisecondsSinceEpoch}.pdf';
+          final file = File('${output.path}/$fileName');
+          await file.writeAsBytes(await pdf.save());
+
+          final params = SaveFileDialogParams(
+            sourceFilePath: file.path,
+            fileName: fileName,
+          );
+          await FlutterFileDialog.saveFile(params: params);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(AppLocalizations.of(context)!.downloadSuccess)),
+          );
+        } catch (e) {
+          if (e.toString().contains('TooManyPagesException')) {
+            // If the report is too large, try to generate it in chunks
+            final chunkSize = 30; // Number of days per chunk
+            final totalDays = _rangeEnd!.difference(_rangeStart!).inDays;
+            final numChunks = (totalDays / chunkSize).ceil();
+
+            for (var i = 0; i < numChunks; i++) {
+              final chunkStart =
+                  _rangeStart!.add(Duration(days: i * chunkSize));
+              var chunkEnd = chunkStart.add(Duration(days: chunkSize - 1));
+              if (chunkEnd.isAfter(_rangeEnd!)) {
+                chunkEnd = _rangeEnd!;
+              }
+
+              final chunkData = Map<String, dynamic>.from(reportData);
+              // Filter data for the current chunk
+              chunkData['openingTasks'] =
+                  (reportData['openingTasks'] as List).where((task) {
+                final taskDate = DateTime.parse(task['createdAt']);
+                return taskDate.isAfter(
+                        chunkStart.subtract(const Duration(days: 1))) &&
+                    taskDate.isBefore(chunkEnd.add(const Duration(days: 1)));
+              }).toList();
+
+              chunkData['closingTasks'] =
+                  (reportData['closingTasks'] as List).where((task) {
+                final taskDate = DateTime.parse(task['createdAt']);
+                return taskDate.isAfter(
+                        chunkStart.subtract(const Duration(days: 1))) &&
+                    taskDate.isBefore(chunkEnd.add(const Duration(days: 1)));
+              }).toList();
+
+              chunkData['sensorData'] =
+                  (reportData['sensorData'] as List).where((sensor) {
+                final sensorDate = DateTime.parse(sensor['_id']['date']);
+                return sensorDate.isAfter(
+                        chunkStart.subtract(const Duration(days: 1))) &&
+                    sensorDate.isBefore(chunkEnd.add(const Duration(days: 1)));
+              }).toList();
+
+              chunkData['incidents'] =
+                  (reportData['incidents'] as List).where((incident) {
+                final incidentDate = DateTime.parse(incident['reportedAt']);
+                return incidentDate.isAfter(
+                        chunkStart.subtract(const Duration(days: 1))) &&
+                    incidentDate
+                        .isBefore(chunkEnd.add(const Duration(days: 1)));
+              }).toList();
+
+              final chunkPdf = await PdfService.generateReport(
+                startDate: chunkStart,
+                endDate: chunkEnd,
+                data: chunkData,
+                languageCode: currentLanguageCode,
+              );
+
+              final chunkFileName =
+                  'report_${DateTime.now().millisecondsSinceEpoch}_part${i + 1}.pdf';
+              final chunkFile = File('${output.path}/$chunkFileName');
+              await chunkFile.writeAsBytes(await chunkPdf.save());
+
+              final chunkParams = SaveFileDialogParams(
+                sourceFilePath: chunkFile.path,
+                fileName: chunkFileName,
+              );
+              await FlutterFileDialog.saveFile(params: chunkParams);
+            }
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(AppLocalizations.of(context)!.downloadSuccess)),
+            );
+          } else {
+            rethrow;
+          }
+        }
       } else {
+        print(response.statusCode);
         throw Exception('Failed to download report: ${response.statusCode}');
       }
     } catch (e) {
+      print(e.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text(

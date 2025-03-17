@@ -36,12 +36,13 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
       _isLoading = true;
       _results = null;
     });
-
+    print(widget.token);
     try {
       final results = await AllergyService.fetchAllergyResults(
-          _allergensController.text.trim());
+          _allergensController.text.trim(), widget.token);
       setState(() {
         _results = results;
+        print(_results);
         _isLoading = false;
       });
     } catch (e) {
@@ -54,22 +55,31 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
     }
   }
 
-  Widget _buildResultSection(String title, List<String> items) {
+  Widget _buildResultSection(String title, List<Object> items, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
         ),
         const SizedBox(height: 8),
         ...items.map((item) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
-                item,
+                (item as Map<String, dynamic>)['name'],
                 style: const TextStyle(fontSize: 14),
               ),
             )),
@@ -136,12 +146,16 @@ class _AllergyCheckPageState extends State<AllergyCheckPage> {
                     children: [
                       _buildResultSection(
                         l10n.safeItems,
-                        List<String>.from(_results!['safeItems'] ?? []),
+                        List<Object>.from(
+                            _results!['dishesWithAllergens'] ?? []),
+                        Colors.green,
                       ),
                       const SizedBox(height: 24),
                       _buildResultSection(
                         l10n.unsafeItems,
-                        List<String>.from(_results!['unsafeItems'] ?? []),
+                        List<Object>.from(
+                            _results!['dishesWithoutAllergens'] ?? []),
+                        Colors.red,
                       ),
                     ],
                   ),

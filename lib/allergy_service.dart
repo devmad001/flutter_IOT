@@ -1,18 +1,18 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:guardstar/config.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+final baseUrl = dotenv.env['BASE_URL'];
 class AllergyService {
   static Future<Map<String, dynamic>> fetchAllergyResults(
-      String allergens) async {
-    final url = '${Config.baseUrl}/user/allergy-check';
+      String allergens,String token   ) async {
+    final url = '${baseUrl}/user/dish/search'+'?allergens=${allergens}';
+  print(url);
+  print(token);
     try {
-      final response = await http.post(
+      final response = await http.get(
         Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'allergens': allergens}),
+       headers: {'Authorization': 'Bearer ${token}'},
       );
 
       if (response.statusCode == 200) {

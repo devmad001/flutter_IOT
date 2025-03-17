@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-class PdfService {
+class FontManager {
   static pw.Font? _chineseFont;
   static pw.Font? _defaultFont;
 
-  static Future<pw.Font> _getChineseFont() async {
+  static Future<pw.Font> getChineseFont() async {
     if (_chineseFont == null) {
       final fontData = await rootBundle
           .load('assets/fonts/NotoSansSC-VariableFont_wght.ttf');
@@ -17,24 +17,31 @@ class PdfService {
     return _chineseFont!;
   }
 
-  static pw.Font _getDefaultFont() {
+  static pw.Font getDefaultFont() {
     if (_defaultFont == null) {
       _defaultFont = pw.Font.helvetica();
     }
     return _defaultFont!;
   }
+}
 
-  static pw.TextStyle _getTextStyle(
-      {PdfColor? color, String languageCode = 'en'}) {
-    final font = languageCode == 'zh' ? _chineseFont : _getDefaultFont();
+class TextStyleManager {
+  static pw.TextStyle getTextStyle({
+    PdfColor? color,
+    String languageCode = 'en',
+  }) {
+    final font = languageCode == 'zh'
+        ? FontManager._chineseFont
+        : FontManager.getDefaultFont();
     return pw.TextStyle(
       font: font,
       color: color,
     );
   }
+}
 
-  static String _getMappedLanguageCode(String languageCode) {
-    // Map language codes
+class LanguageManager {
+  static String getMappedLanguageCode(String languageCode) {
     switch (languageCode) {
       case 'zh':
         return 'ch';
@@ -51,18 +58,21 @@ class PdfService {
     }
   }
 
-  static String _getLocalizedText(
-      Map<String, dynamic> task, String field, String languageCode) {
-    String mappedLanguageCode = _getMappedLanguageCode(languageCode);
+  static String getLocalizedText(
+    Map<String, dynamic> task,
+    String field,
+    String languageCode,
+  ) {
+    String mappedLanguageCode = getMappedLanguageCode(languageCode);
     return task['${field}_$mappedLanguageCode'] ?? task['${field}_en'] ?? '';
   }
+}
 
-  static pw.Widget _buildHeader(
+class PdfWidgetBuilder {
+  static pw.Widget buildHeader(
       String title, String value, String languageCode) {
     return pw.Container(
-      decoration: pw.BoxDecoration(
-        color: PdfColors.grey300,
-      ),
+      decoration: pw.BoxDecoration(color: PdfColors.grey300),
       child: pw.Row(
         children: [
           pw.Expanded(
@@ -73,9 +83,11 @@ class PdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text(title,
-                      style: _getTextStyle(languageCode: languageCode)),
+                      style: TextStyleManager.getTextStyle(
+                          languageCode: languageCode)),
                   pw.Text(value,
-                      style: _getTextStyle(languageCode: languageCode)),
+                      style: TextStyleManager.getTextStyle(
+                          languageCode: languageCode)),
                 ],
               ),
             ),
@@ -88,9 +100,11 @@ class PdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Actions',
-                      style: _getTextStyle(languageCode: languageCode)),
+                      style: TextStyleManager.getTextStyle(
+                          languageCode: languageCode)),
                   pw.Text('0',
-                      style: _getTextStyle(languageCode: languageCode)),
+                      style: TextStyleManager.getTextStyle(
+                          languageCode: languageCode)),
                 ],
               ),
             ),
@@ -100,8 +114,12 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildTaskRow(Map<String, dynamic> task, bool isCompleted,
-      bool isSection, String languageCode) {
+  static pw.Widget buildTaskRow(
+    Map<String, dynamic> task,
+    bool isCompleted,
+    bool isSection,
+    String languageCode,
+  ) {
     final backgroundColor = isSection ? PdfColors.grey300 : PdfColors.white;
     final contentBackgroundColor = isCompleted && task['content'] == null
         ? PdfColor.fromHex('#81b532')
@@ -110,8 +128,10 @@ class PdfService {
         ? PdfColors.white
         : PdfColors.black;
 
-    String title = _getLocalizedText(task, 'title', languageCode);
-    String content = _getLocalizedText(task, 'content', languageCode);
+    String title =
+        LanguageManager.getLocalizedText(task, 'title', languageCode);
+    String content =
+        LanguageManager.getLocalizedText(task, 'content', languageCode);
 
     return pw.Container(
       decoration: pw.BoxDecoration(
@@ -128,7 +148,8 @@ class PdfService {
             child: pw.Container(
               padding: const pw.EdgeInsets.all(10),
               child: pw.Text(title,
-                  style: _getTextStyle(languageCode: languageCode)),
+                  style: TextStyleManager.getTextStyle(
+                      languageCode: languageCode)),
             ),
           ),
           pw.Expanded(
@@ -148,7 +169,7 @@ class PdfService {
                       : (isCompleted && content.isEmpty)
                           ? 'Yes'
                           : content,
-                  style: _getTextStyle(
+                  style: TextStyleManager.getTextStyle(
                     color: task['isDateRecord']
                         ? PdfColors.black
                         : contentTextColor,
@@ -163,14 +184,13 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildIncidentRow(
+  static pw.Widget buildIncidentRow(
       Map<String, dynamic> task, String languageCode) {
     bool status = task['status'] == "Resolved";
-
     final backgroundColor =
         status ? PdfColor.fromHex('#81b532') : PdfColors.red;
-
-    String incident = _getLocalizedText(task, 'incident', languageCode);
+    String incident =
+        LanguageManager.getLocalizedText(task, 'incident', languageCode);
 
     return pw.Container(
       child: pw.Row(
@@ -180,7 +200,8 @@ class PdfService {
             child: pw.Container(
               padding: const pw.EdgeInsets.all(10),
               child: pw.Text(incident,
-                  style: _getTextStyle(languageCode: languageCode)),
+                  style: TextStyleManager.getTextStyle(
+                      languageCode: languageCode)),
               color: backgroundColor,
             ),
           ),
@@ -193,7 +214,7 @@ class PdfService {
                 alignment: pw.Alignment.centerRight,
                 child: pw.Text(
                   status ? 'Yes' : 'No',
-                  style: _getTextStyle(
+                  style: TextStyleManager.getTextStyle(
                     color: backgroundColor,
                     languageCode: languageCode,
                   ),
@@ -206,8 +227,11 @@ class PdfService {
     );
   }
 
-  static pw.Widget _buildTemperatureRowWithDate(
-      String sensorId, String temperature, String languageCode) {
+  static pw.Widget buildTemperatureRowWithDate(
+    String sensorId,
+    String temperature,
+    String languageCode,
+  ) {
     return pw.Container(
       decoration: pw.BoxDecoration(
         border: pw.Border(
@@ -220,7 +244,8 @@ class PdfService {
             child: pw.Container(
               padding: const pw.EdgeInsets.all(10),
               child: pw.Text(sensorId,
-                  style: _getTextStyle(languageCode: languageCode)),
+                  style: TextStyleManager.getTextStyle(
+                      languageCode: languageCode)),
             ),
           ),
           pw.Expanded(
@@ -231,7 +256,8 @@ class PdfService {
                 alignment: pw.Alignment.center,
                 child: pw.Text(
                   temperature + "°C",
-                  style: _getTextStyle(languageCode: languageCode),
+                  style:
+                      TextStyleManager.getTextStyle(languageCode: languageCode),
                 ),
               ),
             ),
@@ -239,6 +265,102 @@ class PdfService {
         ],
       ),
     );
+  }
+}
+
+class TemperaturePdfBuilder {
+  static pw.Widget buildTemperatureSection(
+    Map<String, dynamic> task,
+    List<Map<String, dynamic>> sensorData,
+    String languageCode,
+  ) {
+    if (task['isTemperature'] != true || task['completeat'] == null) {
+      return pw.SizedBox.shrink();
+    }
+
+    final taskDate = task['completeat'];
+    final taskDateOnly = taskDate.substring(0, 10);
+    final relevantSensorData = sensorData
+        .where((sensor) => sensor['_id']['date'] == taskDateOnly)
+        .toList();
+
+    final Map<String, double> dateTemperatures = {};
+    for (final sensor in relevantSensorData) {
+      final deviceId = sensor['_id']['device_id'];
+      final temp = sensor['averageTemperature'] as double;
+      dateTemperatures[deviceId] = temp;
+    }
+
+    String title =
+        LanguageManager.getLocalizedText(task, 'title', languageCode);
+
+    return pw.Column(
+      children: [
+        pw.Row(
+          children: [
+            pw.Expanded(
+              flex: 7,
+              child: pw.Container(
+                padding: const pw.EdgeInsets.all(10),
+                child: pw.Text(
+                  title,
+                  style:
+                      TextStyleManager.getTextStyle(languageCode: languageCode),
+                ),
+              ),
+            ),
+            pw.Expanded(
+              flex: 3,
+              child: pw.Container(
+                padding: const pw.EdgeInsets.all(10),
+                child: pw.Align(
+                  alignment: pw.Alignment.center,
+                  child: pw.Text(
+                    (task['status'] == "completed") ? 'Yes' : '',
+                    style: TextStyleManager.getTextStyle(
+                        languageCode: languageCode),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        ...dateTemperatures.entries.map((entry) {
+          return PdfWidgetBuilder.buildTemperatureRowWithDate(
+            entry.key,
+            '${entry.value.toStringAsFixed(2)}',
+            languageCode,
+          );
+        }).toList(),
+      ],
+    );
+  }
+}
+
+class PdfService {
+  static Map<String, List<Map<String, dynamic>>> _groupTasksByDate(
+      List<Map<String, dynamic>> tasks) {
+    final Map<String, List<Map<String, dynamic>>> groupedTasks = {};
+
+    for (var task in tasks) {
+      final date =
+          DateTime.parse(task['createdAt']).toIso8601String().substring(0, 10);
+      if (!groupedTasks.containsKey(date)) {
+        groupedTasks[date] = [];
+      }
+      groupedTasks[date]!.add(task);
+    }
+
+    // Sort tasks within each date group by taskNumber
+    groupedTasks.forEach((date, tasks) {
+      tasks.sort((a, b) {
+        final aTaskNumber = a['taskNumber'] ?? 0;
+        final bTaskNumber = b['taskNumber'] ?? 0;
+        return aTaskNumber.compareTo(bTaskNumber);
+      });
+    });
+
+    return groupedTasks;
   }
 
   static Future<pw.Document> generateReport({
@@ -249,142 +371,217 @@ class PdfService {
   }) async {
     final pdf = pw.Document();
     if (languageCode == 'zh') {
-      _chineseFont = await _getChineseFont();
+      await FontManager.getChineseFont();
     }
 
-    // Calculate average temperatures
-    final Map<String, double> averageTemperatures = {};
-    for (final sensor in data['sensorData'] as List) {
-      final deviceId = sensor['_id']['device_id'];
-      final temp = sensor['averageTemperature'] as double;
-      if (averageTemperatures.containsKey(deviceId)) {
-        averageTemperatures[deviceId] =
-            ((averageTemperatures[deviceId]! + temp) / 2);
-      } else {
-        averageTemperatures[deviceId] = temp;
-      }
-    }
+    // Group tasks by date for both opening and closing checklists
+    final groupedOpeningTasks = _groupTasksByDate(data['openingTasks']);
+    final groupedClosingTasks = _groupTasksByDate(data['closingTasks']);
+    print(data['incidents']);
+    // Get all unique dates
+    final allDates = {...groupedOpeningTasks.keys, ...groupedClosingTasks.keys}
+        .toList()
+      ..sort();
 
-    pdf.addPage(
-      pw.MultiPage(
-        pageTheme: pw.PageTheme(
-          theme: pw.ThemeData.withFont(
-            base: languageCode == 'zh' ? _chineseFont! : _getDefaultFont(),
-            bold: languageCode == 'zh' ? _chineseFont! : _getDefaultFont(),
-          ),
-          pageFormat: PdfPageFormat.a4,
+    // Create a list of widgets for each date
+    List<pw.Widget> dateWidgets = [];
+    for (var date in allDates) {
+      dateWidgets.add(
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              DateFormat('yyyy-MM-dd').format(DateTime.parse(date)),
+              style: TextStyleManager.getTextStyle(
+                languageCode: languageCode,
+                color: PdfColors.blue,
+              ),
+            ),
+            pw.SizedBox(height: 10),
+            // Opening Checklist for the day
+            if (groupedOpeningTasks.containsKey(date)) ...[
+              PdfWidgetBuilder.buildHeader(
+                'Opening Checklist',
+                '${groupedOpeningTasks[date]!.length}',
+                languageCode,
+              ),
+              pw.SizedBox(height: 10),
+              ...groupedOpeningTasks[date]!.map((task) {
+                if (task['isTemperature'] == true &&
+                    task['completeat'] != null) {
+                  return TemperaturePdfBuilder.buildTemperatureSection(
+                    task,
+                    data['sensorData'],
+                    languageCode,
+                  );
+                } else {
+                  return PdfWidgetBuilder.buildTaskRow(
+                    task,
+                    task['status'] == 'completed',
+                    false,
+                    languageCode,
+                  );
+                }
+              }).toList(),
+              pw.SizedBox(height: 20),
+            ],
+            // Closing Checklist for the day
+            // if (groupedClosingTasks.containsKey(date)) ...[
+            //   PdfWidgetBuilder.buildHeader(
+            //     'Closing Checklist',
+            //     '${groupedClosingTasks[date]!.length}',
+            //     languageCode,
+            //   ),
+            //   pw.SizedBox(height: 10),
+            //   ...groupedClosingTasks[date]!.map((task) {
+            //     if (task['isTemperature'] == true &&
+            //         task['completeat'] != null) {
+            //       return TemperaturePdfBuilder.buildTemperatureSection(
+            //         task,
+            //         data['sensorData'],
+            //         languageCode,
+            //       );
+            //     } else {
+            //       return PdfWidgetBuilder.buildTaskRow(
+            //         task,
+            //         task['status'] == 'completed',
+            //         false,
+            //         languageCode,
+            //       );
+            //     }
+            //   }).toList(),
+            //   pw.SizedBox(height: 20),
+            // ],
+            pw.Divider(color: PdfColors.grey300),
+            pw.SizedBox(height: 20),
+          ],
         ),
-        build: (context) => [
-          pw.Container(
-            padding: const pw.EdgeInsets.all(50),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                _buildHeader('Flagged items', '0', languageCode),
-                pw.SizedBox(height: 20),
+      );
+    }
 
-                // Opening Tasks
-                ...List<pw.Widget>.generate(
-                  data['openingTasks'].length,
-                  (index) {
-                    final task = data['openingTasks'][index];
-                    print(task['completeat']);
-                    if (task['isTemperature'] == true &&
-                        task['completeat'] != null) {
-                      // Filter sensor data for the task's completedAt date
-                      final taskDate = task['completeat'];
-                      // Convert ISO timestamp to date-only format (YYYY-MM-DD)
-                      final taskDateOnly = taskDate.substring(0, 10);
-                      final relevantSensorData = data['sensorData']
-                          .where(
-                              (sensor) => sensor['_id']['date'] == taskDateOnly)
-                          .toList();
+    // Split date widgets into chunks to avoid too many pages
+    const int maxWidgetsPerPage = 1; // Keep at 1 widget per page
+    for (var i = 0; i < dateWidgets.length; i += maxWidgetsPerPage) {
+      final end = (i + maxWidgetsPerPage < dateWidgets.length)
+          ? i + maxWidgetsPerPage
+          : dateWidgets.length;
+      final pageWidgets = dateWidgets.sublist(i, end);
 
-                      // Calculate temperatures for the specific date
-                      final Map<String, double> dateTemperatures = {};
-                      for (final sensor in relevantSensorData) {
-                        final deviceId = sensor['_id']['device_id'];
-                        final temp = sensor['averageTemperature'] as double;
-                        dateTemperatures[deviceId] = temp;
-                      }
-                      String title = _getLocalizedText(task, 'title', languageCode);
-
-                       
-
-                      return pw.Column(
-                        children: [
-                          pw.Row(
-                                children: [
-                                  pw.Expanded(
-                                    flex: 7,
-                                    child: pw.Container(
-                                      padding: const pw.EdgeInsets.all(10),
-                                      child: pw.Text(title,
-                                          style: _getTextStyle(languageCode: languageCode)),
-                                    ),
-                                  ),
-                                  pw.Expanded(
-                                    flex: 3,
-                                    child: pw.Container(
-                                      padding: const pw.EdgeInsets.all(10),
-                                      child: pw.Align(
-                                        alignment: pw.Alignment.center,
-                                        child: pw.Text(
-                                          (task['status']=="completed")
-                                            ? 'Yes'
-                                            : '',
-                                          style: _getTextStyle(languageCode: languageCode),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                          ...dateTemperatures.entries.map((entry) {
-                            return _buildTemperatureRowWithDate(
-                              entry.key,
-                              '${entry.value.toStringAsFixed(2)}',
-                              languageCode,
-                            );
-                          }).toList(),
-                        ],
-                      );
-                    } else {
-                      return _buildTaskRow(
-                        task,
-                        task['status'] == 'completed',
-                        task['isSection'] == true,
-                        languageCode,
-                      );
-                    }
-                  },
+      // Split the date widget into smaller components
+      for (var widget in pageWidgets) {
+        if (widget is pw.Column) {
+          final children = (widget as pw.Column).children;
+          for (var child in children) {
+            pdf.addPage(
+              pw.MultiPage(
+                pageTheme: pw.PageTheme(
+                  theme: pw.ThemeData.withFont(
+                    base: languageCode == 'zh'
+                        ? FontManager._chineseFont!
+                        : FontManager.getDefaultFont(),
+                    bold: languageCode == 'zh'
+                        ? FontManager._chineseFont!
+                        : FontManager.getDefaultFont(),
+                  ),
+                  pageFormat: PdfPageFormat.a4,
+                  margin: const pw.EdgeInsets.all(10),
                 ),
-
-                // Closing Tasks
-
-                // Incident List Header
-                pw.SizedBox(height: 20),
-                _buildHeader('Incident List', '${data['incidents'].length}',
-                    languageCode),
-                pw.SizedBox(height: 10),
-
-                ...List<pw.Widget>.generate(
-                  data['incidents'].length,
-                  (index) {
-                    final task = data['incidents'][index];
-
-                    return _buildIncidentRow(
-                      task,
-                      languageCode,
-                    );
-                  },
+                build: (context) => [
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(10),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        child,
+                        pw.SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        } else {
+          pdf.addPage(
+            pw.MultiPage(
+              pageTheme: pw.PageTheme(
+                theme: pw.ThemeData.withFont(
+                  base: languageCode == 'zh'
+                      ? FontManager._chineseFont!
+                      : FontManager.getDefaultFont(),
+                  bold: languageCode == 'zh'
+                      ? FontManager._chineseFont!
+                      : FontManager.getDefaultFont(),
+                ),
+                pageFormat: PdfPageFormat.a4,
+                margin: const pw.EdgeInsets.all(60),
+              ),
+              build: (context) => [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(40),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      widget,
+                      pw.SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ],
             ),
+          );
+        }
+      }
+    }
+
+    // Add incidents on a separate page
+    if (data['incidents'].isNotEmpty) {
+      const int maxIncidentsPerPage = 10; // Reduced to 1 incident per page
+      for (var i = 0; i < data['incidents'].length; i += maxIncidentsPerPage) {
+        final end = (i + maxIncidentsPerPage < data['incidents'].length)
+            ? i + maxIncidentsPerPage
+            : data['incidents'].length;
+        final pageIncidents = data['incidents'].sublist(i, end);
+
+        pdf.addPage(
+          pw.MultiPage(
+            pageTheme: pw.PageTheme(
+              theme: pw.ThemeData.withFont(
+                base: languageCode == 'zh'
+                    ? FontManager._chineseFont!
+                    : FontManager.getDefaultFont(),
+                bold: languageCode == 'zh'
+                    ? FontManager._chineseFont!
+                    : FontManager.getDefaultFont(),
+              ),
+              pageFormat: PdfPageFormat.a4,
+            ),
+            build: (context) => [
+              pw.Container(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (i == 0) ...[
+                      PdfWidgetBuilder.buildHeader(
+                        'Incident List',
+                        '${data['incidents'].length}',
+                        languageCode,
+                      ),
+                      pw.SizedBox(height: 30),
+                    ],
+                    PdfWidgetBuilder.buildIncidentRow(
+                      pageIncidents[0],
+                      languageCode,
+                    ),
+                    pw.SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
+      }
+    }
 
     return pdf;
   }

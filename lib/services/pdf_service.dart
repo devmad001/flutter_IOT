@@ -135,52 +135,68 @@ class PdfWidgetBuilder {
 
     return pw.Container(
       decoration: pw.BoxDecoration(
-        color: backgroundColor,
+        color: isSection ? PdfColors.grey300 : backgroundColor,
         border: !isSection
             ? pw.Border(
                 bottom: pw.BorderSide(color: PdfColors.grey300, width: 2))
             : null,
       ),
-      child: pw.Row(
-        children: [
-          pw.Expanded(
-            flex: 7,
-            child: pw.Container(
+      child: isSection
+          ? pw.Container(
               padding: const pw.EdgeInsets.all(10),
-              child: pw.Text(title,
-                  style: TextStyleManager.getTextStyle(
-                      languageCode: languageCode)),
-            ),
-          ),
-          pw.Expanded(
-            flex: 3,
-            child: pw.Container(
-              padding: const pw.EdgeInsets.all(10),
-              color: task['isDateRecord']
-                  ? PdfColors.white
-                  : contentBackgroundColor,
-              child: pw.Align(
-                alignment: pw.Alignment.centerRight,
-                child: pw.Text(
-                  task['isDateRecord']
-                      ? DateFormat('dd MMM yyyy hh:mm a')
-                              .format(DateTime.parse(task['createdAt'])) +
-                          ' GMT'
-                      : (isCompleted && content.isEmpty)
-                          ? 'Yes'
-                          : content,
-                  style: TextStyleManager.getTextStyle(
-                    color: task['isDateRecord']
-                        ? PdfColors.black
-                        : contentTextColor,
-                    languageCode: languageCode,
+              color: PdfColors.grey300,
+              child: pw.Row(
+                children: [
+                  pw.Expanded(
+                    flex: 10,
+                    child: pw.Text(title,
+                        style: TextStyleManager.getTextStyle(
+                            color: PdfColors.black,
+                            languageCode: languageCode)),
+                  ),
+                ],
+              ),
+            )
+          : pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 7,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(10),
+                    child: pw.Text(title,
+                        style: TextStyleManager.getTextStyle(
+                            languageCode: languageCode)),
                   ),
                 ),
-              ),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(10),
+                    color: task['isDateRecord'] || task['content'] != null
+                        ? PdfColors.white
+                        : contentBackgroundColor,
+                    child: pw.Align(
+                      alignment: pw.Alignment.centerRight,
+                      child: pw.Text(
+                        task['isDateRecord']
+                            ? DateFormat('dd MMM yyyy hh:mm a')
+                                    .format(DateTime.parse(task['createdAt'])) +
+                                ' GMT'
+                            : (isCompleted && content.isEmpty)
+                                ? 'Yes'
+                                : content,
+                        style: TextStyleManager.getTextStyle(
+                          color: task['isDateRecord']
+                              ? PdfColors.black
+                              : contentTextColor,
+                          languageCode: languageCode,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -277,7 +293,7 @@ class TemperaturePdfBuilder {
     if (task['isTemperature'] != true || task['completeat'] == null) {
       return pw.SizedBox.shrink();
     }
-
+    final isCompleted = task['status'] == "completed";
     final taskDate = task['completeat'];
     final taskDateOnly = taskDate.substring(0, 10);
     final relevantSensorData = sensorData
@@ -294,36 +310,50 @@ class TemperaturePdfBuilder {
     String title =
         LanguageManager.getLocalizedText(task, 'title', languageCode);
 
+    final contentBackgroundColor =
+        isCompleted ? PdfColor.fromHex('#81b532') : PdfColors.white;
+    final contentTextColor = isCompleted ? PdfColors.white : PdfColors.black;
+
     return pw.Column(
       children: [
-        pw.Row(
-          children: [
-            pw.Expanded(
-              flex: 7,
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(10),
-                child: pw.Text(
-                  title,
-                  style:
-                      TextStyleManager.getTextStyle(languageCode: languageCode),
-                ),
-              ),
-            ),
-            pw.Expanded(
-              flex: 3,
-              child: pw.Container(
-                padding: const pw.EdgeInsets.all(10),
-                child: pw.Align(
-                  alignment: pw.Alignment.center,
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            color: PdfColors.grey300,
+            border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 2)),
+          ),
+          child: pw.Row(
+            children: [
+              pw.Expanded(
+                flex: 7,
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.all(10),
                   child: pw.Text(
-                    (task['status'] == "completed") ? 'Yes' : '',
+                    title,
                     style: TextStyleManager.getTextStyle(
                         languageCode: languageCode),
                   ),
                 ),
               ),
-            ),
-          ],
+              pw.Expanded(
+                flex: 3,
+                child: pw.Container(
+                  color: contentBackgroundColor,
+                  padding: const pw.EdgeInsets.all(10),
+                  child: pw.Align(
+                    alignment: pw.Alignment.centerRight,
+                    child: pw.Text(
+                      (task['status'] == "completed") ? 'Yes' : 'No',
+                      style: TextStyleManager.getTextStyle(
+                        languageCode: languageCode,
+                        color: contentTextColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         ...dateTemperatures.entries.map((entry) {
           return PdfWidgetBuilder.buildTemperatureRowWithDate(
@@ -382,7 +412,11 @@ class PdfService {
     final allDates = {...groupedOpeningTasks.keys, ...groupedClosingTasks.keys}
         .toList()
       ..sort();
-
+    List<pw.Widget> incidentWidgets = [];
+    for (var incident in data['incidents']) {
+      incidentWidgets
+          .add(PdfWidgetBuilder.buildIncidentRow(incident, languageCode));
+    }
     // Create a list of widgets for each date
     List<pw.Widget> dateWidgets = [];
     for (var date in allDates) {
@@ -418,7 +452,7 @@ class PdfService {
                   return PdfWidgetBuilder.buildTaskRow(
                     task,
                     task['status'] == 'completed',
-                    false,
+                    task['isSection'],
                     languageCode,
                   );
                 }
@@ -426,32 +460,32 @@ class PdfService {
               pw.SizedBox(height: 20),
             ],
             // Closing Checklist for the day
-            // if (groupedClosingTasks.containsKey(date)) ...[
-            //   PdfWidgetBuilder.buildHeader(
-            //     'Closing Checklist',
-            //     '${groupedClosingTasks[date]!.length}',
-            //     languageCode,
-            //   ),
-            //   pw.SizedBox(height: 10),
-            //   ...groupedClosingTasks[date]!.map((task) {
-            //     if (task['isTemperature'] == true &&
-            //         task['completeat'] != null) {
-            //       return TemperaturePdfBuilder.buildTemperatureSection(
-            //         task,
-            //         data['sensorData'],
-            //         languageCode,
-            //       );
-            //     } else {
-            //       return PdfWidgetBuilder.buildTaskRow(
-            //         task,
-            //         task['status'] == 'completed',
-            //         false,
-            //         languageCode,
-            //       );
-            //     }
-            //   }).toList(),
-            //   pw.SizedBox(height: 20),
-            // ],
+            if (groupedClosingTasks.containsKey(date)) ...[
+              PdfWidgetBuilder.buildHeader(
+                'Closing Checklist',
+                '${groupedClosingTasks[date]!.length}',
+                languageCode,
+              ),
+              pw.SizedBox(height: 10),
+              ...groupedClosingTasks[date]!.map((task) {
+                if (task['isTemperature'] == true &&
+                    task['completeat'] != null) {
+                  return TemperaturePdfBuilder.buildTemperatureSection(
+                    task,
+                    data['sensorData'],
+                    languageCode,
+                  );
+                } else {
+                  return PdfWidgetBuilder.buildTaskRow(
+                    task,
+                    task['status'] == 'completed',
+                    false,
+                    languageCode,
+                  );
+                }
+              }).toList(),
+              pw.SizedBox(height: 20),
+            ],
             pw.Divider(color: PdfColors.grey300),
             pw.SizedBox(height: 20),
           ],
@@ -461,78 +495,33 @@ class PdfService {
 
     // Split date widgets into chunks to avoid too many pages
     const int maxWidgetsPerPage = 1; // Keep at 1 widget per page
-    for (var i = 0; i < dateWidgets.length; i += maxWidgetsPerPage) {
-      final end = (i + maxWidgetsPerPage < dateWidgets.length)
-          ? i + maxWidgetsPerPage
-          : dateWidgets.length;
-      final pageWidgets = dateWidgets.sublist(i, end);
+    // for (var i = 0; i < dateWidgets.length; i += maxWidgetsPerPage) {
+    //   final end = (i + maxWidgetsPerPage < dateWidgets.length)
+    //       ? i + maxWidgetsPerPage
+    //       : dateWidgets.length;
+    //   final pageWidgets = dateWidgets.sublist(i, end);
 
-      // Split the date widget into smaller components
-      for (var widget in pageWidgets) {
-        if (widget is pw.Column) {
-          final children = (widget as pw.Column).children;
-          for (var child in children) {
-            pdf.addPage(
-              pw.MultiPage(
-                pageTheme: pw.PageTheme(
-                  theme: pw.ThemeData.withFont(
-                    base: languageCode == 'zh'
-                        ? FontManager._chineseFont!
-                        : FontManager.getDefaultFont(),
-                    bold: languageCode == 'zh'
-                        ? FontManager._chineseFont!
-                        : FontManager.getDefaultFont(),
-                  ),
-                  pageFormat: PdfPageFormat.a4,
-                  margin: const pw.EdgeInsets.all(10),
-                ),
-                build: (context) => [
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(10),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        child,
-                        pw.SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-        } else {
-          pdf.addPage(
-            pw.MultiPage(
-              pageTheme: pw.PageTheme(
-                theme: pw.ThemeData.withFont(
-                  base: languageCode == 'zh'
-                      ? FontManager._chineseFont!
-                      : FontManager.getDefaultFont(),
-                  bold: languageCode == 'zh'
-                      ? FontManager._chineseFont!
-                      : FontManager.getDefaultFont(),
-                ),
-                pageFormat: PdfPageFormat.a4,
-                margin: const pw.EdgeInsets.all(60),
-              ),
-              build: (context) => [
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(40),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      widget,
-                      pw.SizedBox(height: 40),
-                    ],
-                  ),
-                ),
-              ],
+    // Split the date widget into smaller components
+    // for (var widget in pageWidgets) {
+    //   if (widget is pw.Column) {
+    //     final children = (widget as pw.Column).children;
+    //     for (var child in children) {
+    pdf.addPage(
+      pw.MultiPage(
+          pageTheme: pw.PageTheme(
+            theme: pw.ThemeData.withFont(
+              base: languageCode == 'zh'
+                  ? FontManager._chineseFont!
+                  : FontManager.getDefaultFont(),
+              bold: languageCode == 'zh'
+                  ? FontManager._chineseFont!
+                  : FontManager.getDefaultFont(),
             ),
-          );
-        }
-      }
-    }
+            pageFormat: PdfPageFormat.a4,
+            margin: const pw.EdgeInsets.all(10),
+          ),
+          build: (context) => dateWidgets),
+    );
 
     // Add incidents on a separate page
     if (data['incidents'].isNotEmpty) {
@@ -561,19 +550,13 @@ class PdfService {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    if (i == 0) ...[
-                      PdfWidgetBuilder.buildHeader(
-                        'Incident List',
-                        '${data['incidents'].length}',
-                        languageCode,
-                      ),
-                      pw.SizedBox(height: 30),
-                    ],
-                    PdfWidgetBuilder.buildIncidentRow(
-                      pageIncidents[0],
+                    PdfWidgetBuilder.buildHeader(
+                      'Incident List',
+                      '${data['incidents'].length}',
                       languageCode,
                     ),
-                    pw.SizedBox(height: 40),
+                    pw.SizedBox(height: 30),
+                    ...incidentWidgets,
                   ],
                 ),
               ),

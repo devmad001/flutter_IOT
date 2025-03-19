@@ -526,7 +526,26 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       ListTile(
-                                        title: Text(taskTitle),
+                                        title: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(taskTitle),
+                                            if (task['comment'] != '')
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 4.0),
+                                                child: Text(
+                                                  task['comment'],
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.grey[600],
+                                                    fontStyle: FontStyle.italic,
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
                                         subtitle: task['isInput'] == true
                                             ? TextField(
                                                 controller:

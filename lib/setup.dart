@@ -19,6 +19,8 @@ class SetupPage extends StatefulWidget {
 class _SetupPageState extends State<SetupPage> {
   bool _visualAlerts = true;
   bool _audioAlerts = true;
+  final TextEditingController _alertFrequencyController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -26,11 +28,19 @@ class _SetupPageState extends State<SetupPage> {
     _loadAlertPreferences();
   }
 
+  @override
+  void dispose() {
+    _alertFrequencyController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadAlertPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _visualAlerts = prefs.getBool('visualAlerts') ?? true;
       _audioAlerts = prefs.getBool('audioAlerts') ?? true;
+      _alertFrequencyController.text =
+          (prefs.getInt('alertFrequencyMinutes') ?? 240).toString();
     });
   }
 
@@ -38,6 +48,10 @@ class _SetupPageState extends State<SetupPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('visualAlerts', _visualAlerts);
     await prefs.setBool('audioAlerts', _audioAlerts);
+    final frequency = int.tryParse(_alertFrequencyController.text);
+    if (frequency != null && frequency > 0) {
+      await prefs.setInt('alertFrequencyMinutes', frequency);
+    }
   }
 
   @override
@@ -145,6 +159,42 @@ class _SetupPageState extends State<SetupPage> {
                       });
                     },
                     secondary: const Icon(Icons.volume_up),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _alertFrequencyController,
+                          decoration: InputDecoration(
+                            labelText: l10n.alertFrequency,
+                            suffixText: 'minutes',
+                            border: const OutlineInputBorder(),
+                            helperText:
+                                'Current: ${_alertFrequencyController.text} minutes',
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {
+                              final frequency = int.tryParse(value);
+                              if (frequency != null && frequency > 0) {
+                                _saveAlertPreferences();
+                              }
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a value';
+                            }
+                            final frequency = int.tryParse(value);
+                            if (frequency == null || frequency <= 0) {
+                              return 'Please enter a valid positive number';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -93,7 +93,7 @@ class _SidebarLayoutState extends State<SidebarLayout> {
             final tempValue = double.parse(temperature);
             if (tempValue < minTemp || tempValue > maxTemp) {
               if (alert) {
-                _showTemperatureAlert(deviceId);
+                _showTemperatureAlert(deviceId, alert);
               }
             }
           } catch (e) {
@@ -104,7 +104,7 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     });
   }
 
-  void _showTemperatureAlert(String deviceId) async {
+  void _showTemperatureAlert(String deviceId, String alert) async {
     // Check visual alerts preference
     final prefs = await SharedPreferences.getInstance();
     final visualAlertsEnabled = prefs.getBool('visualAlerts') ?? true;
@@ -112,18 +112,21 @@ class _SidebarLayoutState extends State<SidebarLayout> {
     if (!_audioAlerts) return;
     if (!visualAlertsEnabled) return;
 
-    print('Audio alert played successfully');
     // Check when the last alert was shown for this device
     final lastAlertTimeKey = 'lastAlertTime_$deviceId';
     final lastAlertTime = prefs.getInt(lastAlertTimeKey) ?? 0;
     final currentTime = DateTime.now().millisecondsSinceEpoch;
 
-    // Calculate if 4 hours have passed (4 hours = 4 * 60 * 60 * 1000 milliseconds)
-    final fourHoursInMillis = 4 * 60 * 60 * 1000;
-    if (currentTime - lastAlertTime < fourHoursInMillis) {
+    // Get alert frequency from preferences (default 240 minutes = 4 hours)
+    final alertFrequencyMinutes = prefs.getInt('alertFrequencyMinutes') ?? 240;
+    final alertFrequencyMillis =
+        alertFrequencyMinutes * 60 * 1000; // Convert minutes to milliseconds
+
+    if (currentTime - lastAlertTime < alertFrequencyMillis) {
       // Not enough time has passed since the last alert
       return;
     }
+    print('Audio alert played successfully');
     await _audioPlayer.setSource(AssetSource('alert.mp3'));
     await _audioPlayer.play(AssetSource('alert.mp3'));
     // Save the current time as the last alert time for this device

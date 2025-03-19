@@ -135,12 +135,9 @@ class PdfWidgetBuilder {
 
     return pw.Container(
       decoration: pw.BoxDecoration(
-        color: isSection ? PdfColors.grey300 : backgroundColor,
-        border: !isSection
-            ? pw.Border(
-                bottom: pw.BorderSide(color: PdfColors.grey300, width: 2))
-            : null,
-      ),
+          color: isSection ? PdfColors.grey300 : backgroundColor,
+          border: pw.Border(
+              bottom: pw.BorderSide(color: PdfColors.grey300, width: 2))),
       child: isSection
           ? pw.Container(
               padding: const pw.EdgeInsets.all(10),
@@ -171,7 +168,7 @@ class PdfWidgetBuilder {
                 pw.Expanded(
                   flex: 3,
                   child: pw.Container(
-                    padding: const pw.EdgeInsets.all(10),
+                    padding: const pw.EdgeInsets.all(8),
                     color: task['isDateRecord'] || task['content'] != null
                         ? PdfColors.white
                         : contentBackgroundColor,
@@ -316,45 +313,45 @@ class TemperaturePdfBuilder {
 
     return pw.Column(
       children: [
-        pw.Container(
-          decoration: pw.BoxDecoration(
-            color: PdfColors.grey300,
-            border: pw.Border(
-                bottom: pw.BorderSide(color: PdfColors.grey300, width: 2)),
-          ),
-          child: pw.Row(
-            children: [
-              pw.Expanded(
-                flex: 7,
-                child: pw.Container(
-                  padding: const pw.EdgeInsets.all(10),
-                  child: pw.Text(
-                    title,
-                    style: TextStyleManager.getTextStyle(
-                        languageCode: languageCode),
-                  ),
-                ),
-              ),
-              pw.Expanded(
-                flex: 3,
-                child: pw.Container(
-                  color: contentBackgroundColor,
-                  padding: const pw.EdgeInsets.all(10),
-                  child: pw.Align(
-                    alignment: pw.Alignment.centerRight,
-                    child: pw.Text(
-                      (task['status'] == "completed") ? 'Yes' : 'No',
-                      style: TextStyleManager.getTextStyle(
-                        languageCode: languageCode,
-                        color: contentTextColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // pw.Container(
+        //   decoration: pw.BoxDecoration(
+        //     color: PdfColors.grey300,
+        //     border: pw.Border(
+        //         bottom: pw.BorderSide(color: PdfColors.black, width: 2)),
+        //   ),
+        //   child: pw.Row(
+        //     children: [
+        //       pw.Expanded(
+        //         flex: 7,
+        //         child: pw.Container(
+        //           padding: const pw.EdgeInsets.all(10),
+        //           child: pw.Text(
+        //             title,
+        //             style: TextStyleManager.getTextStyle(
+        //                 languageCode: languageCode),
+        //           ),
+        //         ),
+        //       ),
+        //       pw.Expanded(
+        //         flex: 3,
+        //         child: pw.Container(
+        //           color: contentBackgroundColor,
+        //           padding: const pw.EdgeInsets.all(10),
+        //           child: pw.Align(
+        //             alignment: pw.Alignment.centerRight,
+        //             child: pw.Text(
+        //               (task['status'] == "completed") ? 'Yes' : 'No',
+        //               style: TextStyleManager.getTextStyle(
+        //                 languageCode: languageCode,
+        //                 color: contentTextColor,
+        //               ),
+        //             ),
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
         ...dateTemperatures.entries.map((entry) {
           return PdfWidgetBuilder.buildTemperatureRowWithDate(
             entry.key,

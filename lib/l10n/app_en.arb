@@ -375,5 +375,9 @@
     "checklistCompletedSuccessfully": "Checklist completed successfully",
     "@checklistCompletedSuccessfully": {
         "description": "Message shown when checklist is completed"
+    },
+    "alertFrequency": "Alert Frequency",
+    "@alertFrequency": {
+        "description": "Label for alert frequency input field"
     }
 }

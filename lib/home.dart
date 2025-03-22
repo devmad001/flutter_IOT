@@ -282,8 +282,7 @@ class _HomeScreenState extends State<HomeScreen>
             };
           }
         }
-        print("#########");
-        print(sensorRecords);
+        print("#########"); 
         sensorData = sensorRecords
             .map((record) => {
                   'dev_eui': record['dev_eui'],

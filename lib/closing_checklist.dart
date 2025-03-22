@@ -24,6 +24,7 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
   List<dynamic> tasks = [];
   bool isLoading = true;
   String dueTime = '';
+  bool isChecklistCompleted = false;
   final ScrollController _scrollController = ScrollController();
   double _scrollPosition = 0.0;
   String tempInputValue = '';
@@ -35,6 +36,7 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
     super.initState();
     fetchTasks();
     fetchDueTime();
+    fetchChecklistCompletionStatus();
     _scrollController.addListener(_scrollListener);
   }
 
@@ -117,8 +119,38 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
     }
   }
 
+  Future<void> fetchChecklistCompletionStatus() async {
+    final url = '${Config.baseUrl}/user/restaurant/close-checklist';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          isChecklistCompleted = data['completed'] ?? false;
+        });
+      } else {
+        print('Failed to load checklist completion status');
+      }
+    } catch (e) {
+      print('Error fetching checklist completion status: $e');
+    }
+  }
+
   Future<void> updateTaskContent(
       String taskId, bool isCompleted, String content) async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Checklist is already completed. Cannot update tasks.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = isCompleted ? 'completed' : 'pending';
 
@@ -168,6 +200,15 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
   }
 
   Future<void> updateTaskComment(String taskId, String comment) async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Checklist is already completed. Cannot update tasks.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = 'pending';
 
@@ -213,6 +254,15 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
   }
 
   Future<void> updateTaskStatus(String taskId, bool isCompleted) async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Checklist is already completed. Cannot update tasks.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = isCompleted ? 'completed' : 'pending';
 
@@ -256,6 +306,13 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
   }
 
   Future<void> updateChecklistCompletion() async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Checklist is already completed.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/restaurant/close-checklist';
     try {
       final response = await http.put(
@@ -300,6 +357,7 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
               TextButton(
                 onPressed: () async {
                   await updateChecklistCompletion();
+                  await fetchChecklistCompletionStatus();
                   Widget page;
                   page = SidebarLayout(
                     token: widget.token,
@@ -319,7 +377,7 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('could not complete')),
+        SnackBar(content: Text('Please complete all tasks before submitting')),
       );
     }
   }
@@ -431,6 +489,9 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final metricsProvider = Provider.of<MetricsProvider>(context);
+    final sensorProvider = Provider.of<SensorDataProvider>(context);
+
     return Scaffold(
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -442,12 +503,33 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           top: 60.0, left: 16.0, right: 16.0, bottom: 16.0),
-                      child: Text(
-                        l10n.closingChecklist,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.closingChecklist,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (isChecklistCompleted)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'Completed',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -542,20 +624,22 @@ class _ClosingChecklistPageState extends State<ClosingChecklistPage> {
                                           children: [
                                             GestureDetector(
                                               onTap: () {
-                                                if (task['isInput'] == true) {
-                                                  updateTaskContent(
+                                                if (task['comment'] == '') {
+                                                  if (task['isInput'] == true) {
+                                                    updateTaskContent(
+                                                        task['_id'],
+                                                        task['status'] !=
+                                                            'completed',
+                                                        tempInputValue != ""
+                                                            ? tempInputValue
+                                                            : taskcontent);
+                                                  } else {
+                                                    updateTaskStatus(
                                                       task['_id'],
                                                       task['status'] !=
                                                           'completed',
-                                                      tempInputValue != ""
-                                                          ? tempInputValue
-                                                          : taskcontent);
-                                                } else {
-                                                  updateTaskStatus(
-                                                    task['_id'],
-                                                    task['status'] !=
-                                                        'completed',
-                                                  );
+                                                    );
+                                                  }
                                                 }
                                               },
                                               child: Container(

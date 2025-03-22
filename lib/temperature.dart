@@ -20,7 +20,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
   String? sensorError;
   Map<String, dynamic> latestSensorData = {};
   String? selectedSensorId;
-  String? selectedSensorName="";
+  String? selectedSensorName = "";
   // --- Temperature Settings State ---
   bool settingsLoading = true;
   bool settingsSubmitting = false;
@@ -174,7 +174,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                selectedSensorName??"",
+                selectedSensorName ?? "",
                 style:
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
@@ -185,10 +185,12 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                 style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8),
-              latestSensorData['battery']!=null?Text(
-                l10n.batteryValue(latestSensorData['battery'].toString()),
-                style: const TextStyle(fontSize: 18),
-              ): const SizedBox(height: 8),
+              latestSensorData['battery'] != null
+                  ? Text(
+                      l10n.batteryValue(latestSensorData['battery'].toString()),
+                      style: const TextStyle(fontSize: 18),
+                    )
+                  : const SizedBox(height: 8),
               Text(
                 l10n.lastUpdated(formatDateTime(latestSensorData['createdAt'])),
                 style: const TextStyle(fontSize: 16),
@@ -291,14 +293,9 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               max: 100,
               divisions: 50,
               label: minTempSetting.toStringAsFixed(1),
-              onChanged: (value) {
-                setState(() {
-                  minTempSetting = value;
-                  if (minTempSetting > maxTempSetting) {
-                    maxTempSetting = minTempSetting;
-                  }
-                });
-              },
+              activeColor: Colors.grey,
+              inactiveColor: Colors.grey.shade300,
+              onChanged: (value) {},
             ),
             const SizedBox(height: 16),
             Text(l10n.maxTemperature(maxTempSetting.toStringAsFixed(1)),
@@ -309,14 +306,9 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
               max: 100,
               divisions: 50,
               label: maxTempSetting.toStringAsFixed(1),
-              onChanged: (value) {
-                setState(() {
-                  maxTempSetting = value;
-                  if (maxTempSetting < minTempSetting) {
-                    minTempSetting = maxTempSetting;
-                  }
-                });
-              },
+              activeColor: Colors.grey,
+              inactiveColor: Colors.grey.shade300,
+              onChanged: (value) {},
             ),
             const SizedBox(height: 16),
             Row(
@@ -325,11 +317,10 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
                     style: const TextStyle(fontSize: 16)),
                 Switch(
                   value: alertEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      alertEnabled = value;
-                    });
-                  },
+                  activeColor: Colors.grey,
+                  inactiveThumbColor: Colors.grey.shade400,
+                  inactiveTrackColor: Colors.grey.shade300,
+                  onChanged: (value) {},
                 ),
               ],
             ),
@@ -338,6 +329,7 @@ class _TemperatureScreenState extends State<TemperatureScreen> {
             TextFormField(
               controller: _delayController,
               keyboardType: TextInputType.number,
+              enabled: false,
               decoration: InputDecoration(
                 hintText: l10n.enterDelayMinutes,
               ),

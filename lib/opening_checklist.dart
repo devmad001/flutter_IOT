@@ -24,6 +24,7 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
   List<dynamic> tasks = [];
   bool isLoading = true;
   String dueTime = '';
+  bool isChecklistCompleted = false;
   final ScrollController _scrollController = ScrollController();
   double _scrollPosition = 0.0;
   String tempInputValue = '';
@@ -35,6 +36,7 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
     super.initState();
     fetchTasks();
     fetchDueTime();
+    fetchChecklistCompletionStatus();
 
     // Add scroll listener
     _scrollController.addListener(_scrollListener);
@@ -119,7 +121,37 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
     }
   }
 
+  Future<void> fetchChecklistCompletionStatus() async {
+    final url = '${Config.baseUrl}/user/restaurant/open-checklist';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer ${widget.token}'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          isChecklistCompleted = data['completed'] ?? false;
+        });
+      } else {
+        print('Failed to load checklist completion status');
+      }
+    } catch (e) {
+      print('Error fetching checklist completion status: $e');
+    }
+  }
+
   Future<void> updateTaskComment(String taskId, String comment) async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Checklist is already completed. Cannot update tasks.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = 'pending';
 
@@ -167,6 +199,15 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
 
   Future<void> updateTaskContent(
       String taskId, bool isCompleted, String content) async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Checklist is already completed. Cannot update tasks.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = isCompleted ? 'completed' : 'pending';
 
@@ -216,6 +257,15 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
   }
 
   Future<void> updateTaskStatus(String taskId, bool isCompleted) async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text('Checklist is already completed. Cannot update tasks.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/checklists/$taskId';
     final status = isCompleted ? 'completed' : 'pending';
 
@@ -259,6 +309,13 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
   }
 
   Future<void> updateChecklistCompletion() async {
+    if (isChecklistCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Checklist is already completed.')),
+      );
+      return;
+    }
+
     final url = '${Config.baseUrl}/user/restaurant/open-checklist';
     try {
       final response = await http.put(
@@ -446,12 +503,33 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           top: 60.0, left: 16.0, right: 16.0, bottom: 16.0),
-                      child: Text(
-                        l10n.openingChecklist,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.openingChecklist,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (isChecklistCompleted)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'Completed',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -573,20 +651,22 @@ class _OpeningChecklistPageState extends State<OpeningChecklistPage> {
                                           children: [
                                             GestureDetector(
                                               onTap: () {
-                                                if (task['isInput'] == true) {
-                                                  updateTaskContent(
+                                                if (task['comment'] == '') {
+                                                  if (task['isInput'] == true) {
+                                                    updateTaskContent(
+                                                        task['_id'],
+                                                        task['status'] !=
+                                                            'completed',
+                                                        tempInputValue != ""
+                                                            ? tempInputValue
+                                                            : taskcontent);
+                                                  } else {
+                                                    updateTaskStatus(
                                                       task['_id'],
                                                       task['status'] !=
                                                           'completed',
-                                                      tempInputValue != ""
-                                                          ? tempInputValue
-                                                          : taskcontent);
-                                                } else {
-                                                  updateTaskStatus(
-                                                    task['_id'],
-                                                    task['status'] !=
-                                                        'completed',
-                                                  );
+                                                    );
+                                                  }
                                                 }
                                               },
                                               child: Container(

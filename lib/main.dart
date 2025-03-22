@@ -8,6 +8,8 @@ import 'providers/language_provider.dart';
 import 'providers/metrics_provider.dart';
 import 'providers/socket_provider.dart';
 import 'package:guardstar/providers/sensor_data_provider.dart';
+import 'package:guardstar/providers/alertsensor_data_provider.dart';
+import 'package:guardstar/providers/checklistalert_data_provider.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,8 @@ Future main() async {
         ChangeNotifierProvider(create: (_) => SocketProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => SensorDataProvider()),
+        ChangeNotifierProvider(create: (_) => AlertSensorDataProvider()),
+        ChangeNotifierProvider(create: (_) => ChecklistAlertDataProvider()),
       ],
       child: const MyApp(),
     ),

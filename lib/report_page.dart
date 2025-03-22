@@ -129,21 +129,21 @@ class _ReportPageState extends State<ReportPage> {
             languageCode: currentLanguageCode,
           );
 
-          // Save PDF to a temporary file
-          // final fileName =
-          //     'report_${DateTime.now().millisecondsSinceEpoch}.pdf';
-          // final file = File('${output.path}/$fileName');
-          // await file.writeAsBytes(await pdf.save());
+          //Save PDF to a temporary file
+          final fileName =
+              'report_${DateTime.now().millisecondsSinceEpoch}.pdf';
+          final file = File('${output.path}/$fileName');
+          await file.writeAsBytes(await pdf.save());
 
-          // final params = SaveFileDialogParams(
-          //   sourceFilePath: file.path,
-          //   fileName: fileName,
-          // );
-          // await FlutterFileDialog.saveFile(params: params);
-          // Show PDF preview
-          await Printing.layoutPdf(
-            onLayout: (PdfPageFormat format) async => pdf.save(),
+          final params = SaveFileDialogParams(
+            sourceFilePath: file.path,
+            fileName: fileName,
           );
+          await FlutterFileDialog.saveFile(params: params);
+          // Show PDF preview
+          // await Printing.layoutPdf(
+          //   onLayout: (PdfPageFormat format) async => pdf.save(),
+          // );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(AppLocalizations.of(context)!.downloadSuccess)),

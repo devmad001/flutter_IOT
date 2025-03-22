@@ -160,42 +160,7 @@ class _SetupPageState extends State<SetupPage> {
                     },
                     secondary: const Icon(Icons.volume_up),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _alertFrequencyController,
-                          decoration: InputDecoration(
-                            labelText: l10n.alertFrequency,
-                            suffixText: 'minutes',
-                            border: const OutlineInputBorder(),
-                            helperText:
-                                'Current: ${_alertFrequencyController.text} minutes',
-                          ),
-                          keyboardType: TextInputType.number,
-                          onChanged: (value) {
-                            if (value.isNotEmpty) {
-                              final frequency = int.tryParse(value);
-                              if (frequency != null && frequency > 0) {
-                                _saveAlertPreferences();
-                              }
-                            }
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a value';
-                            }
-                            final frequency = int.tryParse(value);
-                            if (frequency == null || frequency <= 0) {
-                              return 'Please enter a valid positive number';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                  
                 ],
               ),
             ),

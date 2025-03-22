@@ -9,6 +9,8 @@ import 'package:guardstar/sidebar_layout.dart';
 import 'package:provider/provider.dart';
 import 'package:guardstar/providers/socket_provider.dart';
 import 'package:guardstar/providers/sensor_data_provider.dart';
+import 'package:guardstar/providers/alertsensor_data_provider.dart';
+import 'package:guardstar/providers/checklistalert_data_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -38,7 +40,14 @@ class _LoginScreenState extends State<LoginScreen> {
           Provider.of<SocketProvider>(context, listen: false);
       final sensorDataProvider =
           Provider.of<SensorDataProvider>(context, listen: false);
-      socketProvider.initSocket(token, sensorDataProvider: sensorDataProvider);
+      final alertsensorDataProvider =
+          Provider.of<AlertSensorDataProvider>(context, listen: false);
+      final checklistalertDataProvider =
+          Provider.of<ChecklistAlertDataProvider>(context, listen: false);
+      socketProvider.initSocket(token,
+          sensorDataProvider: sensorDataProvider,
+          alertsensorDataProvider: alertsensorDataProvider,
+          checklistalertDataProvider: checklistalertDataProvider);
 
       // Token found, navigate directly to HomeScreen
       Navigator.pushReplacement(
@@ -77,18 +86,25 @@ class _LoginScreenState extends State<LoginScreen> {
         final responseData = jsonDecode(response.body);
         _showMessage("Login Successful");
         final token = responseData['token'];
+        final userid = responseData['userid'];
 
         // Initialize socket connection
         final socketProvider =
             Provider.of<SocketProvider>(context, listen: false);
         final sensorDataProvider =
             Provider.of<SensorDataProvider>(context, listen: false);
+        final alertsensorDataProvider =
+            Provider.of<AlertSensorDataProvider>(context, listen: false);
+        final checklistalertDataProvider =
+            Provider.of<ChecklistAlertDataProvider>(context, listen: false);
         socketProvider.initSocket(token,
-            sensorDataProvider: sensorDataProvider);
+            sensorDataProvider: sensorDataProvider,
+            alertsensorDataProvider: alertsensorDataProvider,
+            checklistalertDataProvider: checklistalertDataProvider);
 
         // Store token securely
         await _secureStorage.write(key: 'token', value: token);
-
+        await _secureStorage.write(key: 'userid', value: userid);
         // Navigate to home screen
         Navigator.pushReplacement(
           context,

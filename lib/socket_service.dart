@@ -127,12 +127,6 @@ class SocketService {
     socket?.onError((error) {
       print('Socket error: $error');
     });
-
-    // Subscribe to alert events at socket initialization
-    socket?.on('alertSensorData', (data) {
-      print('Received temperature alert: $data');
-      _showNotificationForEvent('alertSensorData', data);
-    });
   }
 
   void onConnect(Function() callback) {
@@ -168,28 +162,9 @@ class SocketService {
     socket?.on(event, (data) {
       print("Received event: $event");
       // Show notification for the received event
-      _showNotificationForEvent(event, data);
       // Execute the callback
       callback(data);
     });
-  }
-
-  Future<void> _showNotificationForEvent(String event, dynamic data) async {
-    bool _visualAlerts = true;
-    bool _audioAlerts = true;
-    final prefs = await SharedPreferences.getInstance();
-    _visualAlerts = prefs.getBool('visualAlerts') ?? true;
-    _audioAlerts = prefs.getBool('audioAlerts') ?? true;
-
-    if (_audioAlerts) {
-   // await _playAudioAlert();
-    }
-
-    if (_visualAlerts) {
-      final deviceId = data['device_id'] ?? 'Unknown Device';
-      final temperature = data['temperature']?.toString() ?? 'unknown';
-      // Add your notification logic here
-    }
   }
 
   void emitEvent(String event, dynamic data) {

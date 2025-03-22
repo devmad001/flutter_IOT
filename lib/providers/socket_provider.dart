@@ -1,18 +1,28 @@
 import 'package:flutter/material.dart';
 import '../socket_service.dart';
 import 'sensor_data_provider.dart';
+import 'alertsensor_data_provider.dart';
+import 'checklistalert_data_provider.dart';
 
 class SocketProvider extends ChangeNotifier {
   final SocketService _socketService = SocketService.instance;
   bool _isConnected = false;
   String? _token;
   SensorDataProvider? _sensorDataProvider;
+  AlertSensorDataProvider? _alertsensorDataProvider;
+  ChecklistAlertDataProvider? _checklistalertDataProvider;
 
   bool get isConnected => _isConnected;
 
-  void initSocket(String token, {SensorDataProvider? sensorDataProvider}) {
+  void initSocket(String token,
+      {SensorDataProvider? sensorDataProvider,
+      AlertSensorDataProvider? alertsensorDataProvider,
+      ChecklistAlertDataProvider? checklistalertDataProvider}) {
     _token = token;
     _sensorDataProvider = sensorDataProvider;
+    _alertsensorDataProvider = alertsensorDataProvider;
+    _checklistalertDataProvider = checklistalertDataProvider;
+
     _socketService.initSocket(token);
     _isConnected = true;
 
@@ -35,7 +45,12 @@ class SocketProvider extends ChangeNotifier {
         _sensorDataProvider?.updateSensorData(data);
       });
     }
-    
+    subscribeToEvent('alertSensorData', (data) {
+      _alertsensorDataProvider?.updateSensorData(data);
+    });
+    subscribeToEvent('openingChecklistDue', (data) {
+      _checklistalertDataProvider?.updateChecklistData(data);
+    });
     notifyListeners();
   }
 

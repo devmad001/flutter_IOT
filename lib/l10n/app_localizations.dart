@@ -10,6 +10,9 @@ import 'app_localizations_it.dart';
 import 'app_localizations_pl.dart';
 import 'app_localizations_tr.dart';
 import 'app_localizations_zh.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_ar.dart';
 
 // ignore_for_file: type=lint
 
@@ -65,10 +68,11 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations([String locale = 'en']) {
+    this.locale = locale;
+  }
 
-  final String localeName;
+  late String locale;
 
   static AppLocalizations? of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
@@ -101,7 +105,10 @@ abstract class AppLocalizations {
     Locale('it'),
     Locale('pl'),
     Locale('tr'),
-    Locale('zh')
+    Locale('zh'),
+    Locale('ja'),
+    Locale('hi'),
+    Locale('ar')
   ];
 
   /// No description provided for @appTitle.
@@ -805,8 +812,16 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'it', 'pl', 'tr', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+        'en',
+        'it',
+        'pl',
+        'tr',
+        'zh',
+        'ja',
+        'hi',
+        'ar'
+      ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -825,6 +840,12 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
       return AppLocalizationsTr();
     case 'zh':
       return AppLocalizationsZh();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'ar':
+      return AppLocalizationsAr();
   }
 
   throw FlutterError(

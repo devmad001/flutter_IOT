@@ -6,15 +6,50 @@ import 'package:flutter/services.dart' show rootBundle;
 
 class FontManager {
   static pw.Font? _chineseFont;
+  static pw.Font? _japaneseFont;
+  static pw.Font? _arabicFont;
   static pw.Font? _defaultFont;
 
-  static Future<pw.Font> getChineseFont() async {
+  static Future<void> initializeFonts() async {
     if (_chineseFont == null) {
       final fontData = await rootBundle
           .load('assets/fonts/NotoSansSC-VariableFont_wght.ttf');
       _chineseFont = pw.Font.ttf(fontData);
     }
+    if (_japaneseFont == null) {
+      final fontData = await rootBundle
+          .load('assets/fonts/NotoSansJP-VariableFont_wght.ttf');
+      _japaneseFont = pw.Font.ttf(fontData);
+    }
+    if (_arabicFont == null) {
+      final fontData = await rootBundle
+          .load('assets/fonts/NotoSansArabic-VariableFont_wght.ttf');
+      _arabicFont = pw.Font.ttf(fontData);
+    }
+    if (_defaultFont == null) {
+      _defaultFont = pw.Font.helvetica();
+    }
+  }
+
+  static pw.Font getChineseFont() {
+    if (_chineseFont == null) {
+      throw Exception('Fonts not initialized. Call initializeFonts() first.');
+    }
     return _chineseFont!;
+  }
+
+  static pw.Font getJapaneseFont() {
+    if (_japaneseFont == null) {
+      throw Exception('Fonts not initialized. Call initializeFonts() first.');
+    }
+    return _japaneseFont!;
+  }
+
+  static pw.Font getArabicFont() {
+    if (_arabicFont == null) {
+      throw Exception('Fonts not initialized. Call initializeFonts() first.');
+    }
+    return _arabicFont!;
   }
 
   static pw.Font getDefaultFont() {
@@ -30,9 +65,20 @@ class TextStyleManager {
     PdfColor? color,
     String languageCode = 'en',
   }) {
-    final font = languageCode == 'zh'
-        ? FontManager._chineseFont
-        : FontManager.getDefaultFont();
+    pw.Font font;
+    switch (languageCode) {
+      case 'zh':
+        font = FontManager.getChineseFont();
+        break;
+      case 'ja':
+        font = FontManager.getJapaneseFont();
+        break;
+      case 'ar':
+        font = FontManager.getArabicFont();
+        break;
+      default:
+        font = FontManager.getDefaultFont();
+    }
     return pw.TextStyle(
       font: font,
       color: color,
@@ -45,6 +91,12 @@ class LanguageManager {
     switch (languageCode) {
       case 'zh':
         return 'ch';
+      case 'ja':
+        return 'jp';
+      case 'hi':
+        return 'hi';
+      case 'ar':
+        return 'ar';
       case 'en':
         return 'en';
       case 'pl':
@@ -313,45 +365,6 @@ class TemperaturePdfBuilder {
 
     return pw.Column(
       children: [
-        // pw.Container(
-        //   decoration: pw.BoxDecoration(
-        //     color: PdfColors.grey300,
-        //     border: pw.Border(
-        //         bottom: pw.BorderSide(color: PdfColors.black, width: 2)),
-        //   ),
-        //   child: pw.Row(
-        //     children: [
-        //       pw.Expanded(
-        //         flex: 7,
-        //         child: pw.Container(
-        //           padding: const pw.EdgeInsets.all(10),
-        //           child: pw.Text(
-        //             title,
-        //             style: TextStyleManager.getTextStyle(
-        //                 languageCode: languageCode),
-        //           ),
-        //         ),
-        //       ),
-        //       pw.Expanded(
-        //         flex: 3,
-        //         child: pw.Container(
-        //           color: contentBackgroundColor,
-        //           padding: const pw.EdgeInsets.all(10),
-        //           child: pw.Align(
-        //             alignment: pw.Alignment.centerRight,
-        //             child: pw.Text(
-        //               (task['status'] == "completed") ? 'Yes' : 'No',
-        //               style: TextStyleManager.getTextStyle(
-        //                 languageCode: languageCode,
-        //                 color: contentTextColor,
-        //               ),
-        //             ),
-        //           ),
-        //         ),
-        //       ),
-        //     ],
-        //   ),
-        // ),
         ...dateTemperatures.entries.map((entry) {
           return PdfWidgetBuilder.buildTemperatureRowWithDate(
             entry.key,
@@ -398,7 +411,7 @@ class PdfService {
   }) async {
     final pdf = pw.Document();
     if (languageCode == 'zh') {
-      await FontManager.getChineseFont();
+      await FontManager.initializeFonts();
     }
 
     // Group tasks by date for both opening and closing checklists
@@ -492,17 +505,6 @@ class PdfService {
 
     // Split date widgets into chunks to avoid too many pages
     const int maxWidgetsPerPage = 1; // Keep at 1 widget per page
-    // for (var i = 0; i < dateWidgets.length; i += maxWidgetsPerPage) {
-    //   final end = (i + maxWidgetsPerPage < dateWidgets.length)
-    //       ? i + maxWidgetsPerPage
-    //       : dateWidgets.length;
-    //   final pageWidgets = dateWidgets.sublist(i, end);
-
-    // Split the date widget into smaller components
-    // for (var widget in pageWidgets) {
-    //   if (widget is pw.Column) {
-    //     final children = (widget as pw.Column).children;
-    //     for (var child in children) {
     pdf.addPage(
       pw.MultiPage(
           pageTheme: pw.PageTheme(

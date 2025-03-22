@@ -82,6 +82,8 @@ flutter:
     - assets/logo.jpeg
     - .env
     - assets/fonts/NotoSansSC-VariableFont_wght.ttf
+    - assets/fonts/NotoSansJP-VariableFont_wght.ttf
+    - assets/fonts/NotoSansArabic-VariableFont_wght.ttf
     - assets/alert.mp3
     - assets/alert_test.mp3
   # To add assets to your application, add an assets section, like this:

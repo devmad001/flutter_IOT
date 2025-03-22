@@ -48,6 +48,12 @@ class _CreateIncidentPageState extends State<CreateIncidentPage> {
       displayLanguage = 'Turkish';
     } else if (language == 'it') {
       displayLanguage = 'Italian';
+    } else if (language == 'ja') {
+      displayLanguage = 'Japanese';
+    } else if (language == 'hi') {
+      displayLanguage = 'Hindi';
+    } else if (language == 'ar') {
+      displayLanguage = 'Arabic';
     } else {
       displayLanguage = language;
     }

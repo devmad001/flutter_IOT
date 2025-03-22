@@ -1,0 +1,238 @@
+{
+    "appTitle": "Alpha",
+    "home": "होम",
+    "reports": "रिपोर्ट",
+    "setup": "सेटअप",
+    "team": "टीम",
+    "temperature": "तापमान",
+    "incidents": "घटनाएं",
+    "logout": "लॉग आउट",
+    "login": "लॉग इन",
+    "username": "उपयोगकर्ता नाम",
+    "password": "पासवर्ड",
+    "submit": "जमा करें",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "create": "बनाएं",
+    "search": "खोजें",
+    "noData": "कोई डेटा उपलब्ध नहीं",
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफल",
+    "warning": "चेतावनी",
+    "info": "जानकारी",
+    "notifications": "सूचनाएं",
+    "notificationsSubtitle": "सूचना सेटिंग्स कॉन्फ़िगर करें",
+    "language": "भाषा",
+    "security": "सुरक्षा",
+    "securitySubtitle": "सुरक्षा सेटिंग्स प्रबंधित करें",
+    "backup": "बैकअप और पुनर्स्थापना",
+    "backupSubtitle": "डेटा बैकअप और पुनर्स्थापना प्रबंधित करें",
+    "viewChecklist": "चेकलिस्ट देखें",
+    "clickToFill": "भरने के लिए क्लिक करें",
+    "addIncident": "घटना जोड़ें",
+    "createIncident": "घटना बनाएं",
+    "openingChecklist": "खुलने की चेकलिस्ट",
+    "closingChecklist": "बंद होने की चेकलिस्ट",
+    "unknownRestaurant": "अज्ञात रेस्तरां",
+    "battery": "बैटरी",
+    "lastUpdated": "अंतिम अपडेट: {datetime}",
+    "@lastUpdated": {
+        "description": "Last updated label with datetime",
+        "placeholders": {
+            "datetime": {
+                "type": "String",
+                "example": "2024-01-01 12:00:00"
+            }
+        }
+    },
+    "selectDateRange": "दिनांक सीमा चुनें",
+    "noTemperatureData": "चयनित दिनांक सीमा के लिए कोई तापमान डेटा उपलब्ध नहीं",
+    "temperatureHistory": "तापमान इतिहास",
+    "temperatureChart": "तापमान चार्ट",
+    "temperatureTable": "तापमान तालिका",
+    "menuHome": "होम",
+    "menuOpeningChecks": "खुलने की जांच",
+    "menuClosingChecks": "बंद होने की जांच",
+    "menuTemperatures": "तापमान",
+    "menuTeam": "टीम",
+    "menuIncidents": "घटनाएं",
+    "menuReports": "रिपोर्ट",
+    "menuAllergyCheck": "एलर्जी जांच",
+    "menuSetup": "सेटअप",
+    "menuLogout": "लॉग आउट",
+    "temperatureUnit": "तापमान इकाई",
+    "selectReportFrequency": "रिपोर्ट आवृत्ति चुनें",
+    "chooseReportRange": "कृपया रिपोर्ट दिनांक सीमा चुनें",
+    "thisWeek": "इस सप्ताह",
+    "thisMonth": "इस महीने",
+    "customRange": "कस्टम सीमा",
+    "selectedRange": "चयनित सीमा: {start} - {end}",
+    "@selectedRange": {
+        "description": "Selected date range label",
+        "placeholders": {
+            "start": {
+                "type": "String",
+                "example": "2024-01-01"
+            },
+            "end": {
+                "type": "String",
+                "example": "2024-01-31"
+            }
+        }
+    },
+    "reportContents": "रिपोर्ट में शामिल होंगे:",
+    "openingChecks": "खुलने की जांच",
+    "closingChecks": "बंद होने की जांच",
+    "temperatureReadings": "तापमान रीडिंग",
+    "incidentsLogged": "दर्ज की गई घटनाएं",
+    "downloading": "डाउनलोड हो रहा है...",
+    "downloadReport": "रिपोर्ट डाउनलोड करें",
+    "selectDateFirst": "कृपया पहले दिनांक सीमा चुनें",
+    "downloadSuccess": "रिपोर्ट सफलतापूर्वक डाउनलोड हो गई",
+    "downloadError": "रिपोर्ट डाउनलोड करने में त्रुटि: {error}",
+    "@downloadError": {
+        "description": "Error message when download fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "noTasksAvailable": "कोई कार्य उपलब्ध नहीं",
+    "alertSettings": "अलर्ट सेटिंग्स",
+    "visualAlerts": "विजुअल अलर्ट",
+    "showPopupNotifications": "पॉपअप सूचनाएं दिखाएं",
+    "audioAlerts": "ऑडियो अलर्ट",
+    "playSoundNotifications": "ध्वनि सूचनाएं चलाएं",
+    "temperatures": "तापमान",
+    "selectSensorPrompt": "विवरण देखने के लिए ऊपर की सूची से एक सेंसर चुनें",
+    "noSensorData": "कोई सेंसर डेटा उपलब्ध नहीं",
+    "sensorId": "सेंसर आईडी: {id}",
+    "@sensorId": {
+        "description": "Sensor ID label with value",
+        "placeholders": {
+            "id": {
+                "type": "String",
+                "example": "SENSOR001"
+            }
+        }
+    },
+    "temperatureValue": "तापमान: {value}°C",
+    "@temperatureValue": {
+        "description": "Temperature value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "25.5"
+            }
+        }
+    },
+    "batteryValue": "बैटरी: {value}%",
+    "@batteryValue": {
+        "description": "Battery value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "85"
+            }
+        }
+    },
+    "sensorList": "सेंसर सूची",
+    "currentState": "वर्तमान स्थिति",
+    "temperatureSetting": "तापमान सेटिंग",
+    "noTemperatureSettings": "कोई तापमान सेटिंग उपलब्ध नहीं",
+    "minTemp": "न्यूनतम: {value}°C",
+    "@minTemp": {
+        "description": "Minimum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemp": "अधिकतम: {value}°C",
+    "@maxTemp": {
+        "description": "Maximum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "alertEnabled": "अलर्ट: सक्षम",
+    "alertDisabled": "अलर्ट: अक्षम",
+    "delayMinutes": "विलंब: {value} मिनट",
+    "@delayMinutes": {
+        "description": "Delay in minutes label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5"
+            }
+        }
+    },
+    "minTemperature": "न्यूनतम तापमान: {value}°C",
+    "@minTemperature": {
+        "description": "Minimum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemperature": "अधिकतम तापमान: {value}°C",
+    "@maxTemperature": {
+        "description": "Maximum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "temperatureAlert": "तापमान अलर्ट:",
+    "delayBeforeAlert": "अलर्ट से पहले विलंब (मिनट):",
+    "enterDelayMinutes": "विलंब मिनटों में दर्ज करें",
+    "pleaseEnterDelay": "कृपया विलंब मान दर्ज करें",
+    "enterValidNumber": "कृपया एक मान्य गैर-नकारात्मक पूर्णांक दर्ज करें",
+    "customerAllergy": "ग्राहक एलर्जी",
+    "enterAllergens": "एलर्जेन दर्ज करें",
+    "searching": "खोज रहा है...",
+    "pleaseEnterAllergens": "कृपया जांच करने के लिए एलर्जेन दर्ज करें",
+    "safeItems": "एलर्जेन-मुक्त परिणाम",
+    "unsafeItems": "एलर्जेन युक्त परिणाम",
+    "teamMembersList": "टीम सदस्य सूची",
+    "retry": "पुनः प्रयास करें",
+    "failedToLoadTeamMembers": "टीम सदस्यों को लोड करने में विफल: {error}",
+    "@failedToLoadTeamMembers": {
+        "description": "Error message when team members fail to load",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "errorFetchingTeamMembers": "टीम सदस्यों को प्राप्त करने में त्रुटि: {error}",
+    "@errorFetchingTeamMembers": {
+        "description": "Error message when fetching team members fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "name": "नाम",
+    "userLevel": "उपयोगकर्ता स्तर",
+    "emailAddress": "ईमेल पता",
+    "trainingLevel": "प्रशिक्षण स्तर",
+    "checklistCompletedSuccessfully": "चेकलिस्ट सफलतापूर्वक पूरी हो गई"
+} 

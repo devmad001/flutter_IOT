@@ -13,7 +13,7 @@ class LanguageSelector extends StatelessWidget {
           value: languageProvider.currentLocale.languageCode,
           onChanged: (String? newValue) {
             if (newValue != null) {
-              languageProvider.changeLanguage(newValue);
+              languageProvider.setLanguage(newValue);
             }
           },
           items: const [
@@ -36,6 +36,18 @@ class LanguageSelector extends StatelessWidget {
             DropdownMenuItem<String>(
               value: 'tr',
               child: Text('Türkçe'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'ja',
+              child: Text('日本語'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'hi',
+              child: Text('हिंदी'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'ar',
+              child: Text('العربية'),
             ),
           ],
         );

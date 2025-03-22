@@ -51,6 +51,9 @@ class MyApp extends StatelessWidget {
             Locale('pl'),
             Locale('it'),
             Locale('tr'),
+            Locale('ja'),
+            Locale('hi'),
+            Locale('ar'),
           ],
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),

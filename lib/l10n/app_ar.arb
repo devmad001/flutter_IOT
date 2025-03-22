@@ -1,0 +1,238 @@
+{
+    "appTitle": "Alpha",
+    "home": "الرئيسية",
+    "reports": "التقارير",
+    "setup": "الإعدادات",
+    "team": "الفريق",
+    "temperature": "درجة الحرارة",
+    "incidents": "الحوادث",
+    "logout": "تسجيل الخروج",
+    "login": "تسجيل الدخول",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "noData": "لا توجد بيانات متاحة",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجاح",
+    "warning": "تحذير",
+    "info": "معلومات",
+    "notifications": "الإشعارات",
+    "notificationsSubtitle": "تكوين إعدادات الإشعارات",
+    "language": "اللغة",
+    "security": "الأمان",
+    "securitySubtitle": "إدارة إعدادات الأمان",
+    "backup": "النسخ الاحتياطي والاستعادة",
+    "backupSubtitle": "إدارة النسخ الاحتياطي واستعادة البيانات",
+    "viewChecklist": "عرض قائمة المراجعة",
+    "clickToFill": "انقر للملء",
+    "addIncident": "إضافة حادث",
+    "createIncident": "إنشاء حادث",
+    "openingChecklist": "قائمة مراجعة الفتح",
+    "closingChecklist": "قائمة مراجعة الإغلاق",
+    "unknownRestaurant": "مطعم غير معروف",
+    "battery": "البطارية",
+    "lastUpdated": "آخر تحديث: {datetime}",
+    "@lastUpdated": {
+        "description": "Last updated label with datetime",
+        "placeholders": {
+            "datetime": {
+                "type": "String",
+                "example": "2024-01-01 12:00:00"
+            }
+        }
+    },
+    "selectDateRange": "اختر نطاق التاريخ",
+    "noTemperatureData": "لا توجد بيانات درجة حرارة متاحة للنطاق المحدد",
+    "temperatureHistory": "سجل درجة الحرارة",
+    "temperatureChart": "مخطط درجة الحرارة",
+    "temperatureTable": "جدول درجة الحرارة",
+    "menuHome": "الرئيسية",
+    "menuOpeningChecks": "فحوصات الفتح",
+    "menuClosingChecks": "فحوصات الإغلاق",
+    "menuTemperatures": "درجات الحرارة",
+    "menuTeam": "الفريق",
+    "menuIncidents": "الحوادث",
+    "menuReports": "التقارير",
+    "menuAllergyCheck": "فحص الحساسية",
+    "menuSetup": "الإعدادات",
+    "menuLogout": "تسجيل الخروج",
+    "temperatureUnit": "وحدة درجة الحرارة",
+    "selectReportFrequency": "اختر تكرار التقرير",
+    "chooseReportRange": "الرجاء اختيار نطاق تاريخ التقرير",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "customRange": "نطاق مخصص",
+    "selectedRange": "النطاق المحدد: {start} - {end}",
+    "@selectedRange": {
+        "description": "Selected date range label",
+        "placeholders": {
+            "start": {
+                "type": "String",
+                "example": "2024-01-01"
+            },
+            "end": {
+                "type": "String",
+                "example": "2024-01-31"
+            }
+        }
+    },
+    "reportContents": "سيحتوي التقرير على:",
+    "openingChecks": "فحوصات الفتح",
+    "closingChecks": "فحوصات الإغلاق",
+    "temperatureReadings": "قراءات درجة الحرارة",
+    "incidentsLogged": "الحوادث المسجلة",
+    "downloading": "جاري التحميل...",
+    "downloadReport": "تحميل التقرير",
+    "selectDateFirst": "الرجاء اختيار نطاق التاريخ أولاً",
+    "downloadSuccess": "تم تحميل التقرير بنجاح",
+    "downloadError": "خطأ في تحميل التقرير: {error}",
+    "@downloadError": {
+        "description": "Error message when download fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "noTasksAvailable": "لا توجد مهام متاحة",
+    "alertSettings": "إعدادات التنبيه",
+    "visualAlerts": "التنبيهات المرئية",
+    "showPopupNotifications": "إظهار إشعارات منبثقة",
+    "audioAlerts": "التنبيهات الصوتية",
+    "playSoundNotifications": "تشغيل إشعارات الصوت",
+    "temperatures": "درجات الحرارة",
+    "selectSensorPrompt": "اختر مستشعراً من القائمة أعلاه لعرض التفاصيل",
+    "noSensorData": "لا توجد بيانات مستشعر متاحة",
+    "sensorId": "معرف المستشعر: {id}",
+    "@sensorId": {
+        "description": "Sensor ID label with value",
+        "placeholders": {
+            "id": {
+                "type": "String",
+                "example": "SENSOR001"
+            }
+        }
+    },
+    "temperatureValue": "درجة الحرارة: {value}°C",
+    "@temperatureValue": {
+        "description": "Temperature value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "25.5"
+            }
+        }
+    },
+    "batteryValue": "البطارية: {value}%",
+    "@batteryValue": {
+        "description": "Battery value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "85"
+            }
+        }
+    },
+    "sensorList": "قائمة المستشعرات",
+    "currentState": "الحالة الحالية",
+    "temperatureSetting": "إعداد درجة الحرارة",
+    "noTemperatureSettings": "لا توجد إعدادات درجة حرارة متاحة",
+    "minTemp": "الحد الأدنى: {value}°C",
+    "@minTemp": {
+        "description": "Minimum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemp": "الحد الأقصى: {value}°C",
+    "@maxTemp": {
+        "description": "Maximum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "alertEnabled": "التنبيه: مفعل",
+    "alertDisabled": "التنبيه: معطل",
+    "delayMinutes": "التأخير: {value} دقيقة",
+    "@delayMinutes": {
+        "description": "Delay in minutes label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5"
+            }
+        }
+    },
+    "minTemperature": "الحد الأدنى لدرجة الحرارة: {value}°C",
+    "@minTemperature": {
+        "description": "Minimum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemperature": "الحد الأقصى لدرجة الحرارة: {value}°C",
+    "@maxTemperature": {
+        "description": "Maximum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "temperatureAlert": "تنبيه درجة الحرارة:",
+    "delayBeforeAlert": "التأخير قبل التنبيه (بالدقائق):",
+    "enterDelayMinutes": "أدخل التأخير بالدقائق",
+    "pleaseEnterDelay": "الرجاء إدخال قيمة التأخير",
+    "enterValidNumber": "الرجاء إدخال رقم صحيح غير سالب",
+    "customerAllergy": "حساسية العميل",
+    "enterAllergens": "أدخل المواد المسببة للحساسية",
+    "searching": "جاري البحث...",
+    "pleaseEnterAllergens": "الرجاء إدخال المواد المسببة للحساسية للفحص",
+    "safeItems": "النتائج الخالية من المواد المسببة للحساسية",
+    "unsafeItems": "النتائج التي تحتوي على مواد مسببة للحساسية",
+    "teamMembersList": "قائمة أعضاء الفريق",
+    "retry": "إعادة المحاولة",
+    "failedToLoadTeamMembers": "فشل في تحميل أعضاء الفريق: {error}",
+    "@failedToLoadTeamMembers": {
+        "description": "Error message when team members fail to load",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "errorFetchingTeamMembers": "خطأ في جلب أعضاء الفريق: {error}",
+    "@errorFetchingTeamMembers": {
+        "description": "Error message when fetching team members fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "name": "الاسم",
+    "userLevel": "مستوى المستخدم",
+    "emailAddress": "البريد الإلكتروني",
+    "trainingLevel": "مستوى التدريب",
+    "checklistCompletedSuccessfully": "تم إكمال قائمة المراجعة بنجاح"
+} 

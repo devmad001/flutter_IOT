@@ -1,0 +1,238 @@
+{
+    "appTitle": "Alpha",
+    "home": "ホーム",
+    "reports": "レポート",
+    "setup": "設定",
+    "team": "チーム",
+    "temperature": "温度",
+    "incidents": "インシデント",
+    "logout": "ログアウト",
+    "login": "ログイン",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "search": "検索",
+    "noData": "データなし",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "warning": "警告",
+    "info": "情報",
+    "notifications": "通知",
+    "notificationsSubtitle": "通知設定の構成",
+    "language": "言語",
+    "security": "セキュリティ",
+    "securitySubtitle": "セキュリティ設定の管理",
+    "backup": "バックアップと復元",
+    "backupSubtitle": "データのバックアップと復元の管理",
+    "viewChecklist": "チェックリストを表示",
+    "clickToFill": "クリックして記入",
+    "addIncident": "インシデントを追加",
+    "createIncident": "インシデントを作成",
+    "openingChecklist": "開店チェックリスト",
+    "closingChecklist": "閉店チェックリスト",
+    "unknownRestaurant": "不明なレストラン",
+    "battery": "バッテリー",
+    "lastUpdated": "最終更新: {datetime}",
+    "@lastUpdated": {
+        "description": "Last updated label with datetime",
+        "placeholders": {
+            "datetime": {
+                "type": "String",
+                "example": "2024-01-01 12:00:00"
+            }
+        }
+    },
+    "selectDateRange": "日付範囲を選択",
+    "noTemperatureData": "選択した日付範囲の温度データがありません",
+    "temperatureHistory": "温度履歴",
+    "temperatureChart": "温度チャート",
+    "temperatureTable": "温度テーブル",
+    "menuHome": "ホーム",
+    "menuOpeningChecks": "開店チェック",
+    "menuClosingChecks": "閉店チェック",
+    "menuTemperatures": "温度",
+    "menuTeam": "チーム",
+    "menuIncidents": "インシデント",
+    "menuReports": "レポート",
+    "menuAllergyCheck": "アレルギーチェック",
+    "menuSetup": "設定",
+    "menuLogout": "ログアウト",
+    "temperatureUnit": "温度単位",
+    "selectReportFrequency": "レポート頻度を選択",
+    "chooseReportRange": "レポートの日付範囲を選択してください",
+    "thisWeek": "今週",
+    "thisMonth": "今月",
+    "customRange": "カスタム範囲",
+    "selectedRange": "選択範囲: {start} - {end}",
+    "@selectedRange": {
+        "description": "Selected date range label",
+        "placeholders": {
+            "start": {
+                "type": "String",
+                "example": "2024-01-01"
+            },
+            "end": {
+                "type": "String",
+                "example": "2024-01-31"
+            }
+        }
+    },
+    "reportContents": "レポートには以下が含まれます：",
+    "openingChecks": "開店チェック",
+    "closingChecks": "閉店チェック",
+    "temperatureReadings": "温度記録",
+    "incidentsLogged": "記録されたインシデント",
+    "downloading": "ダウンロード中...",
+    "downloadReport": "レポートをダウンロード",
+    "selectDateFirst": "最初に日付範囲を選択してください",
+    "downloadSuccess": "レポートのダウンロードに成功しました",
+    "downloadError": "レポートのダウンロードエラー: {error}",
+    "@downloadError": {
+        "description": "Error message when download fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "noTasksAvailable": "利用可能なタスクがありません",
+    "alertSettings": "アラート設定",
+    "visualAlerts": "視覚的アラート",
+    "showPopupNotifications": "ポップアップ通知を表示",
+    "audioAlerts": "音声アラート",
+    "playSoundNotifications": "音声通知を再生",
+    "temperatures": "温度",
+    "selectSensorPrompt": "詳細を表示するには上記のリストからセンサーを選択してください",
+    "noSensorData": "センサーデータがありません",
+    "sensorId": "センサーID: {id}",
+    "@sensorId": {
+        "description": "Sensor ID label with value",
+        "placeholders": {
+            "id": {
+                "type": "String",
+                "example": "SENSOR001"
+            }
+        }
+    },
+    "temperatureValue": "温度: {value}°C",
+    "@temperatureValue": {
+        "description": "Temperature value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "25.5"
+            }
+        }
+    },
+    "batteryValue": "バッテリー: {value}%",
+    "@batteryValue": {
+        "description": "Battery value label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "85"
+            }
+        }
+    },
+    "sensorList": "センサーリスト",
+    "currentState": "現在の状態",
+    "temperatureSetting": "温度設定",
+    "noTemperatureSettings": "温度設定がありません",
+    "minTemp": "最小: {value}°C",
+    "@minTemp": {
+        "description": "Minimum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemp": "最大: {value}°C",
+    "@maxTemp": {
+        "description": "Maximum temperature label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "alertEnabled": "アラート: 有効",
+    "alertDisabled": "アラート: 無効",
+    "delayMinutes": "遅延: {value}分",
+    "@delayMinutes": {
+        "description": "Delay in minutes label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5"
+            }
+        }
+    },
+    "minTemperature": "最小温度: {value}°C",
+    "@minTemperature": {
+        "description": "Minimum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "5.0"
+            }
+        }
+    },
+    "maxTemperature": "最大温度: {value}°C",
+    "@maxTemperature": {
+        "description": "Maximum temperature setting label",
+        "placeholders": {
+            "value": {
+                "type": "String",
+                "example": "10.0"
+            }
+        }
+    },
+    "temperatureAlert": "温度アラート:",
+    "delayBeforeAlert": "アラート前の遅延（分）:",
+    "enterDelayMinutes": "遅延時間を分単位で入力",
+    "pleaseEnterDelay": "遅延値を入力してください",
+    "enterValidNumber": "有効な非負の整数を入力してください",
+    "customerAllergy": "顧客アレルギー",
+    "enterAllergens": "アレルゲンを入力",
+    "searching": "検索中...",
+    "pleaseEnterAllergens": "チェックするアレルゲンを入力してください",
+    "safeItems": "アレルゲンを含まない結果",
+    "unsafeItems": "アレルゲンを含む結果",
+    "teamMembersList": "チームメンバーリスト",
+    "retry": "再試行",
+    "failedToLoadTeamMembers": "チームメンバーの読み込みに失敗: {error}",
+    "@failedToLoadTeamMembers": {
+        "description": "Error message when team members fail to load",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "errorFetchingTeamMembers": "チームメンバーの取得エラー: {error}",
+    "@errorFetchingTeamMembers": {
+        "description": "Error message when fetching team members fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "name": "名前",
+    "userLevel": "ユーザーレベル",
+    "emailAddress": "メールアドレス",
+    "trainingLevel": "トレーニングレベル",
+    "checklistCompletedSuccessfully": "チェックリストが正常に完了しました"
+} 
